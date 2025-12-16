@@ -17,7 +17,7 @@ function ArrowLeftIcon() {
   )
 }
 
-export default function Historico() {
+export default function Contatos() {
   const navigate = useNavigate()
 
   function handleBackToDialer() {
@@ -35,7 +35,7 @@ export default function Historico() {
   return (
     <div className="min-h-screen bg-background text-text">
       <TopBar
-        active="history"
+        active="contacts"
         onHistoryClick={() => navigate('/historico')}
         onContactsClick={() => navigate('/contatos')}
         onLogout={() => navigate('/')}
@@ -44,8 +44,8 @@ export default function Historico() {
       <main className="mx-auto min-h-screen max-w-2xl px-4 pb-10 pt-20">
         <div className="flex items-center justify-between gap-3">
           <div className="space-y-1">
-            <h1 className="text-xl font-semibold tracking-tight">Histórico</h1>
-            <p className="text-sm text-muted">Chamadas recentes (UI apenas).</p>
+            <h1 className="text-xl font-semibold tracking-tight">Contatos</h1>
+            <p className="text-sm text-muted">Agenda do softphone (UI apenas).</p>
           </div>
 
           <button
@@ -61,9 +61,9 @@ export default function Historico() {
 
         <Card className="mt-6 border border-white/5 p-5">
           <div className="space-y-2">
-            <h2 className="text-sm font-semibold text-text">Sem chamadas</h2>
+            <h2 className="text-sm font-semibold text-text">Sem contatos</h2>
             <p className="text-sm text-muted">
-              Esta página é dedicada ao histórico. A listagem real será conectada depois.
+              Esta página é dedicada à agenda. A integração real (SIP/CRM) não está implementada.
             </p>
           </div>
         </Card>
@@ -71,3 +71,5 @@ export default function Historico() {
     </div>
   )
 }
+
+
