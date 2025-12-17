@@ -54,7 +54,7 @@ export default function Caller() {
       />
 
       <main className="mx-auto flex h-full max-w-2xl flex-col px-4 pb-6 pt-24">
-        <section className="mt-20 flex-none md:mt-10">
+        <section className="mt-[5vh] flex-none md:mt-10">
           <DialInput value={dialValue} onChange={handleDialChange} autoFocus disabled={inCall} />
         </section>
 

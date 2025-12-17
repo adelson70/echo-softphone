@@ -23,7 +23,7 @@ export function createMainWindow(): BrowserWindow {
     },
   })
 
-  win.setMenuBarVisibility(false)
+  // win.setMenuBarVisibility(false)
 
   // Test active push message to Renderer-process.
   win.webContents.on('did-finish-load', () => {

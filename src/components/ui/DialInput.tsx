@@ -18,7 +18,7 @@ function cx(...classes: Array<string | undefined | false>) {
 export function DialInput({
   value,
   onChange,
-  placeholder = 'Número, SIP URI ou contato',
+  placeholder = 'Digite o número do contato',
   className,
   ariaLabel,
   autoFocus,
@@ -48,7 +48,7 @@ export function DialInput({
         className={cx(
           'h-14 w-full rounded-2xl border bg-background px-14 text-text text-center',
           'border-[#1E293B]',
-          'text-[22px] leading-none tracking-wide',
+          'text-[18px] leading-none tracking-wide',
           'placeholder:text-muted',
           'transition',
           'focus-visible:outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/30',
