@@ -33,7 +33,7 @@ export default function Contatos() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-background text-text">
+    <div className="h-screen overflow-hidden bg-background text-text">
       <TopBar
         active="contacts"
         onHistoryClick={() => navigate('/historico')}
@@ -41,7 +41,7 @@ export default function Contatos() {
         onLogout={() => navigate('/')}
       />
 
-      <main className="mx-auto min-h-screen max-w-2xl px-4 pb-10 pt-20">
+      <main className="mx-auto h-full max-w-2xl px-4 pb-6 pt-16">
         <div className="flex items-center justify-between gap-3">
           <div className="space-y-1">
             <h1 className="text-xl font-semibold tracking-tight">Contatos</h1>

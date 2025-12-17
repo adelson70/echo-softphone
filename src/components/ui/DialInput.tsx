@@ -5,6 +5,7 @@ type DialInputProps = {
   className?: string
   ariaLabel?: string
   autoFocus?: boolean
+  disabled?: boolean
 }
 
 function cx(...classes: Array<string | undefined | false>) {
@@ -18,6 +19,7 @@ export function DialInput({
   className,
   ariaLabel,
   autoFocus,
+  disabled,
 }: DialInputProps) {
   return (
     <div className={cx('w-full', className)}>
@@ -27,6 +29,7 @@ export function DialInput({
         placeholder={placeholder}
         aria-label={ariaLabel ?? placeholder}
         autoFocus={autoFocus}
+        disabled={disabled}
         type="text"
         inputMode="text"
         className={cx(
@@ -35,7 +38,8 @@ export function DialInput({
           'text-[22px] leading-none tracking-wide',
           'placeholder:text-muted',
           'transition',
-          'focus-visible:outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/30'
+          'focus-visible:outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/30',
+          'disabled:opacity-50 disabled:cursor-not-allowed'
         )}
       />
     </div>

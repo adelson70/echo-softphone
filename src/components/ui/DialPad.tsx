@@ -14,7 +14,7 @@ function cx(...classes: Array<string | undefined | false>) {
 
 export function DialPad({ onKeyPress, className, disabled }: DialPadProps) {
   return (
-    <div className={cx('grid grid-cols-3 gap-3', className)} role="group" aria-label="Discador numérico">
+    <div className={cx('grid w-full grid-cols-3 gap-4', className)} role="group" aria-label="Discador numérico">
       {KEYS.map((k) => (
         <DialButton key={k} label={k} disabled={disabled} onClick={() => onKeyPress(k)} />
       ))}

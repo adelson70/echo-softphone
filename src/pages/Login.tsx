@@ -87,13 +87,13 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-text">
-        <Link to="/caller" className="absolute top-4 right-4">
-          <Button type="button" variant="primary">
-            tela caller
-          </Button>
-        </Link>
-      <div className="flex min-h-screen items-center justify-center p-6">
+    <div className="relative h-screen overflow-hidden bg-background text-text">
+      <Link to="/caller" className="absolute right-4 top-4">
+        <Button type="button" variant="primary">
+          tela caller
+        </Button>
+      </Link>
+      <div className="flex h-full items-center justify-center p-6">
         <Card className="w-full max-w-md border border-white/5">
           <div className="space-y-2">
             <h1 className="text-2xl font-semibold tracking-tight">Registrar conta SIP</h1>
