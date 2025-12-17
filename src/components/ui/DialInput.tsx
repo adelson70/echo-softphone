@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import { Delete } from 'lucide-react'
+import { playLocalDtmfTone } from '../../sip/media/dtmf'
 
 type DialInputProps = {
   value: string
@@ -33,12 +34,24 @@ export function DialInput({
     setTimeout(() => inputRef.current?.focus(), 0)
   }
 
+  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    // Teclas válidas de DTMF: 0-9, *, #
+    const validDtmfKeys = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '*', '#']
+    const key = e.key
+
+    // Verifica se a tecla pressionada é uma tecla válida de DTMF
+    if (validDtmfKeys.includes(key)) {
+      playLocalDtmfTone(key)
+    }
+  }
+
   return (
     <div className={cx('relative w-full text-center', className)}>
       <input
         ref={inputRef}
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        onKeyDown={handleKeyDown}
         placeholder={placeholder}
         aria-label={ariaLabel ?? placeholder}
         autoFocus={autoFocus}
