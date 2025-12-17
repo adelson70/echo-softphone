@@ -1,3 +1,6 @@
+import { useRef } from 'react'
+import { Delete } from 'lucide-react'
+
 type DialInputProps = {
   value: string
   onChange: (value: string) => void
@@ -21,9 +24,19 @@ export function DialInput({
   autoFocus,
   disabled,
 }: DialInputProps) {
+  const inputRef = useRef<HTMLInputElement | null>(null)
+  const showClear = !disabled && value.length > 0
+
+  function handleClear() {
+    onChange('')
+    // Devolve o foco para o input após o clique no botão.
+    setTimeout(() => inputRef.current?.focus(), 0)
+  }
+
   return (
-    <div className={cx('w-full', className)}>
+    <div className={cx('relative w-full', className)}>
       <input
+        ref={inputRef}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
@@ -33,7 +46,7 @@ export function DialInput({
         type="text"
         inputMode="text"
         className={cx(
-          'h-14 w-full rounded-2xl border bg-background px-5 text-text',
+          'h-14 w-full rounded-2xl border bg-background pl-5 pr-14 text-text',
           'border-[#1E293B]',
           'text-[22px] leading-none tracking-wide',
           'placeholder:text-muted',
@@ -42,6 +55,22 @@ export function DialInput({
           'disabled:opacity-50 disabled:cursor-not-allowed'
         )}
       />
+
+      {showClear ? (
+        <button
+          type="button"
+          onClick={handleClear}
+          aria-label="Limpar"
+          className={cx(
+            'absolute inset-y-0 right-0 flex items-center justify-center',
+            'w-12 text-muted transition-colors',
+            'hover:text-text',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:ring-offset-2 focus-visible:ring-offset-background'
+          )}
+        >
+          <Delete size={20} aria-hidden="true" />
+        </button>
+      ) : null}
     </div>
   )
 }
