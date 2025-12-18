@@ -10,6 +10,7 @@ import {
 import type { Session, URI } from 'sip.js'
 import type { SipClientEvents, SipClientSnapshot, SipCredentials } from '../types'
 import { canCancel, canReject, canSendBye } from './sessionGuards'
+import { createFixedSessionDescriptionHandlerFactory } from './customSessionDescriptionHandler'
 
 function formatSipFailure(statusCode?: number, reasonPhrase?: string) {
   if (!statusCode) return 'Falha SIP'
@@ -116,7 +117,7 @@ export class SipClient {
             }
           })
           // Fecha a conexão para parar qualquer áudio de ringback
-          pc.close().catch(() => {})
+          pc.close()
         }
       } catch (e) {
         // Ignora erros ao limpar áudio
@@ -180,6 +181,8 @@ export class SipClient {
       sipExtensionReplaces: SIPExtension.Supported,
       // Alguns PBXs/WebRTC são sensíveis a ICE incompleto; aumentar o timeout ajuda em redes mais lentas.
       sessionDescriptionHandlerFactoryOptions: { iceGatheringTimeout: 10000 },
+      // Factory customizada que corrige SDPs malformados com fingerprint incompleto
+      sessionDescriptionHandlerFactory: createFixedSessionDescriptionHandlerFactory(),
       transportOptions: {
         server: this.server.wsServer,
       },
