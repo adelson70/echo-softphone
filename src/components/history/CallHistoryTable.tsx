@@ -2,7 +2,7 @@ import type { CallHistoryEntry } from '../../services/historyService'
 
 type CallHistoryTableProps = {
   entries: CallHistoryEntry[]
-  onCall: (number: string) => void
+  onCall?: (number: string) => void
 }
 
 function formatDuration(seconds?: number): string {
@@ -84,20 +84,6 @@ function FailedCallIcon() {
   )
 }
 
-function PhoneIcon() {
-  return (
-    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path
-        d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
-}
-
 function getCallIcon(entry: CallHistoryEntry) {
   const isFailed = entry.status === 'failed' || entry.status === 'rejected' || entry.status === 'missed'
   
@@ -126,8 +112,23 @@ function getCallIconColor(entry: CallHistoryEntry): string {
   return 'text-success'
 }
 
+function truncateName(name: string, maxLength: number = 9): string {
+  if (name.length <= maxLength) {
+    return name
+  }
+  return name.slice(0, maxLength) + '...'
+}
+
 function getTooltipContent(entry: CallHistoryEntry): string {
   const lines: string[] = []
+  
+  // Nome completo se disponível
+  if (entry.displayName) {
+    lines.push(`Nome: ${entry.displayName}`)
+  }
+  
+  // Número
+  lines.push(`Número: ${entry.number}`)
   
   // Direção
   lines.push(`Direção: ${entry.direction === 'incoming' ? 'Entrante' : 'Saída'}`)
@@ -144,11 +145,6 @@ function getTooltipContent(entry: CallHistoryEntry): string {
   
   // Data e hora completa
   lines.push(`Horário: ${formatDateTime(entry.startTime)}`)
-  
-  // Nome se disponível
-  if (entry.displayName) {
-    lines.push(`Nome: ${entry.displayName}`)
-  }
   
   return lines.join('\n')
 }
@@ -170,7 +166,6 @@ export function CallHistoryTable({ entries, onCall }: CallHistoryTableProps) {
             <th className="px-3 py-2.5 text-left text-xs font-semibold text-muted">Nome</th>
             <th className="px-3 py-2.5 text-left text-xs font-semibold text-muted">Número</th>
             <th className="px-3 py-2.5 text-left text-xs font-semibold text-muted">Horário</th>
-            <th className="px-3 py-2.5 text-center text-xs font-semibold text-muted w-12"></th>
           </tr>
         </thead>
         <tbody>
@@ -182,8 +177,7 @@ export function CallHistoryTable({ entries, onCall }: CallHistoryTableProps) {
             return (
               <tr
                 key={entry.id}
-                className="border-b border-white/5 transition-colors hover:bg-white/5 cursor-pointer group"
-                onClick={() => onCall(entry.number)}
+                className="border-b border-white/5 transition-colors hover:bg-white/5"
                 title={tooltipContent}
               >
                 <td className="px-3 py-2">
@@ -191,8 +185,8 @@ export function CallHistoryTable({ entries, onCall }: CallHistoryTableProps) {
                     <span className={`${iconColor} shrink-0`} title={tooltipContent}>
                       {getCallIcon(entry)}
                     </span>
-                    <span className="text-xs text-text truncate max-w-[200px]" title={displayName}>
-                      {displayName}
+                    <span className="text-xs text-text truncate max-w-[200px]" title={tooltipContent}>
+                      {truncateName(displayName)}
                     </span>
                   </div>
                 </td>
@@ -203,20 +197,6 @@ export function CallHistoryTable({ entries, onCall }: CallHistoryTableProps) {
                   <span className="text-xs text-muted whitespace-nowrap" title={tooltipContent}>
                     {formatDateTime(entry.startTime)}
                   </span>
-                </td>
-                <td className="px-3 py-2">
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      onCall(entry.number)
-                    }}
-                    className="mx-auto flex items-center justify-center rounded-lg border border-white/10 bg-white/5 p-1.5 text-text transition-colors hover:bg-primary hover:text-background hover:border-primary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-                    aria-label={`Ligar para ${entry.number}`}
-                    title={`Ligar para ${entry.number}`}
-                  >
-                    <PhoneIcon />
-                  </button>
                 </td>
               </tr>
             )

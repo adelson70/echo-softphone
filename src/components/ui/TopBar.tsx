@@ -136,15 +136,17 @@ function LogoutIcon() {
 type IconButtonProps = {
   active?: boolean
   ariaLabel: string
+  title?: string
   onClick: () => void
   children: ReactNode
 }
 
-function IconButton({ active, ariaLabel, onClick, children }: IconButtonProps) {
+function IconButton({ active, ariaLabel, title, onClick, children }: IconButtonProps) {
   return (
     <button
       type="button"
       aria-label={ariaLabel}
+      title={title || ariaLabel}
       onClick={onClick}
       className={cx(
         'inline-flex h-11 w-11 items-center justify-center rounded-xl transition-colors',
@@ -165,6 +167,7 @@ export function TopBar({ onDialerClick, onHistoryClick, onContactsClick, onChatC
         <div className="flex items-center justify-start">
           <IconButton
             ariaLabel="Discador"
+            title="Discador - Fazer e receber chamadas"
             onClick={onDialerClick}
             active={active === 'dialer'}
           >
@@ -175,6 +178,7 @@ export function TopBar({ onDialerClick, onHistoryClick, onContactsClick, onChatC
         <div className="flex items-center justify-center">
           <IconButton
             ariaLabel="Histórico de chamadas"
+            title="Histórico - Ver histórico de chamadas"
             onClick={onHistoryClick}
             active={active === 'history'}
           >
@@ -185,6 +189,7 @@ export function TopBar({ onDialerClick, onHistoryClick, onContactsClick, onChatC
         <div className="flex items-center justify-center">
           <IconButton
             ariaLabel="Agenda e contatos"
+            title="Contatos - Ver agenda e contatos"
             onClick={onContactsClick}
             active={active === 'contacts'}
           >
@@ -195,6 +200,7 @@ export function TopBar({ onDialerClick, onHistoryClick, onContactsClick, onChatC
         <div className="flex items-center justify-center">
           <IconButton
             ariaLabel="Chat"
+            title="Chat - Mensagens e conversas"
             onClick={onChatClick}
             active={active === 'chat'}
           >
@@ -205,6 +211,7 @@ export function TopBar({ onDialerClick, onHistoryClick, onContactsClick, onChatC
         <div className="flex items-center justify-end">
           <IconButton
             ariaLabel="Sair"
+            title="Sair - Desconectar e sair do sistema"
             onClick={onLogout}
           >
             <LogoutIcon />

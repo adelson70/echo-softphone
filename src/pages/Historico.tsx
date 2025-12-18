@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { TopBar } from '../components/ui/TopBar'
 import { Card } from '../components/ui/Card'
@@ -50,6 +50,7 @@ export default function Historico() {
   const [history, setHistory] = useState<CallHistoryEntry[]>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
+  const isFirstLoadRef = useRef(true)
 
   function handleCall(number: string) {
     // Se não houver chamada ativa, navega para o discador com o número pré-preenchido
@@ -85,14 +86,20 @@ export default function Historico() {
 
   useEffect(() => {
     async function loadHistory() {
-      setLoading(true)
+      // Só mostra loading na primeira carga
+      if (isFirstLoadRef.current) {
+        setLoading(true)
+      }
       try {
         const entries = await getCallHistory()
         setHistory(entries)
       } catch (error) {
         console.error('Erro ao carregar histórico:', error)
       } finally {
-        setLoading(false)
+        if (isFirstLoadRef.current) {
+          setLoading(false)
+          isFirstLoadRef.current = false
+        }
       }
     }
     void loadHistory()
@@ -228,7 +235,7 @@ export default function Historico() {
                   scrollbar-color: rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05);
                 }
               `}</style>
-              <CallHistoryTable entries={filteredHistory} onCall={handleCall} />
+              <CallHistoryTable entries={filteredHistory} />
             </div>
           )}
         </Card>
