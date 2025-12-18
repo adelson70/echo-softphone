@@ -1,8 +1,11 @@
+import { useState } from 'react'
 import type { CallHistoryEntry } from '../../services/historyService'
+import { ContextMenu } from './ContextMenu'
 
 type CallHistoryTableProps = {
   entries: CallHistoryEntry[]
   onCall?: (number: string) => void
+  onAddContact?: (number: string, name?: string) => void
 }
 
 function formatDuration(seconds?: number): string {
@@ -149,7 +152,34 @@ function getTooltipContent(entry: CallHistoryEntry): string {
   return lines.join('\n')
 }
 
-export function CallHistoryTable({ entries, onCall }: CallHistoryTableProps) {
+export function CallHistoryTable({ entries, onCall, onAddContact }: CallHistoryTableProps) {
+  const [contextMenu, setContextMenu] = useState<{
+    x: number
+    y: number
+    number: string
+    name?: string
+  } | null>(null)
+
+  function handleContextMenu(event: React.MouseEvent, entry: CallHistoryEntry) {
+    event.preventDefault()
+    setContextMenu({
+      x: event.clientX,
+      y: event.clientY,
+      number: entry.number,
+      name: entry.displayName,
+    })
+  }
+
+  function handleCloseContextMenu() {
+    setContextMenu(null)
+  }
+
+  function handleAddContact() {
+    if (contextMenu && onAddContact) {
+      onAddContact(contextMenu.number, contextMenu.name)
+    }
+  }
+
   if (entries.length === 0) {
     return (
       <div className="flex items-center justify-center py-12 text-center">
@@ -159,51 +189,67 @@ export function CallHistoryTable({ entries, onCall }: CallHistoryTableProps) {
   }
 
   return (
-    <div className="w-full">
-      <table className="w-full border-collapse text-xs">
-        <thead className="sticky top-0 z-10 bg-card">
-          <tr className="border-b border-white/10">
-            <th className="px-3 py-2.5 text-left text-xs font-semibold text-muted">Nome</th>
-            <th className="px-3 py-2.5 text-left text-xs font-semibold text-muted">Número</th>
-            <th className="px-3 py-2.5 text-left text-xs font-semibold text-muted">Horário</th>
-          </tr>
-        </thead>
-        <tbody>
-          {entries.map((entry) => {
-            const displayName = entry.displayName || entry.number
-            const iconColor = getCallIconColor(entry)
-            const tooltipContent = getTooltipContent(entry)
-            
-            return (
-              <tr
-                key={entry.id}
-                className="border-b border-white/5 transition-colors hover:bg-white/5"
-                title={tooltipContent}
-              >
-                <td className="px-3 py-2">
-                  <div className="flex items-center gap-2">
-                    <span className={`${iconColor} shrink-0`} title={tooltipContent}>
-                      {getCallIcon(entry)}
+    <>
+      <div className="w-full">
+        <table className="w-full border-collapse text-xs">
+          <thead className="sticky top-0 z-10 bg-card">
+            <tr className="border-b border-white/10">
+              <th className="px-3 py-2.5 text-left text-xs font-semibold text-muted">Nome</th>
+              <th className="px-3 py-2.5 text-left text-xs font-semibold text-muted">Número</th>
+              <th className="px-3 py-2.5 text-left text-xs font-semibold text-muted">Horário</th>
+            </tr>
+          </thead>
+          <tbody>
+            {entries.map((entry) => {
+              const displayName = entry.displayName || entry.number
+              const iconColor = getCallIconColor(entry)
+              const tooltipContent = getTooltipContent(entry)
+              
+              return (
+                <tr
+                  key={entry.id}
+                  className="border-b border-white/5 transition-colors hover:bg-white/5 cursor-pointer"
+                  title={tooltipContent}
+                  onContextMenu={(e) => handleContextMenu(e, entry)}
+                  onClick={() => {
+                    if (onCall) {
+                      onCall(entry.number)
+                    }
+                  }}
+                >
+                  <td className="px-3 py-2">
+                    <div className="flex items-center gap-2">
+                      <span className={`${iconColor} shrink-0`} title={tooltipContent}>
+                        {getCallIcon(entry)}
+                      </span>
+                      <span className="text-xs text-text truncate max-w-[200px]" title={tooltipContent}>
+                        {truncateName(displayName)}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="px-3 py-2">
+                    <span className="text-xs text-text" title={tooltipContent}>{entry.number}</span>
+                  </td>
+                  <td className="px-3 py-2">
+                    <span className="text-xs text-muted whitespace-nowrap" title={tooltipContent}>
+                      {formatDateTime(entry.startTime)}
                     </span>
-                    <span className="text-xs text-text truncate max-w-[200px]" title={tooltipContent}>
-                      {truncateName(displayName)}
-                    </span>
-                  </div>
-                </td>
-                <td className="px-3 py-2">
-                  <span className="text-xs text-text" title={tooltipContent}>{entry.number}</span>
-                </td>
-                <td className="px-3 py-2">
-                  <span className="text-xs text-muted whitespace-nowrap" title={tooltipContent}>
-                    {formatDateTime(entry.startTime)}
-                  </span>
-                </td>
-              </tr>
-            )
-          })}
-        </tbody>
-      </table>
-    </div>
+                  </td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </div>
+      {contextMenu && (
+        <ContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          onClose={handleCloseContextMenu}
+          onAddContact={handleAddContact}
+        />
+      )}
+    </>
   )
 }
 

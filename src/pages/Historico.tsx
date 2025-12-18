@@ -6,6 +6,8 @@ import { useSip } from '../sip/react/useSip'
 import { clearStorage } from '../services/storageService'
 import { getCallHistory, clearCallHistory, type CallHistoryEntry } from '../services/historyService'
 import { CallHistoryTable } from '../components/history/CallHistoryTable'
+import { addContact } from '../services/contactService'
+import { AddContactModal } from '../components/contacts/AddContactModal'
 
 function TrashIcon() {
   return (
@@ -51,6 +53,8 @@ export default function Historico() {
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const isFirstLoadRef = useRef(true)
+  const [addContactModalOpen, setAddContactModalOpen] = useState(false)
+  const [contactToAdd, setContactToAdd] = useState<{ number: string; name?: string } | null>(null)
 
   function handleCall(number: string) {
     // Se não houver chamada ativa, navega para o discador com o número pré-preenchido
@@ -68,6 +72,15 @@ export default function Historico() {
       setHistory([])
       setSearchQuery('')
     }
+  }
+
+  function handleAddContact(number: string, name?: string) {
+    setContactToAdd({ number, name })
+    setAddContactModalOpen(true)
+  }
+
+  async function handleSaveContact(contactName: string, contactNumber: string) {
+    await addContact(contactName, contactNumber)
   }
 
   // Filtro de pesquisa
@@ -120,7 +133,6 @@ export default function Historico() {
         onDialerClick={() => navigate('/caller')}
         onHistoryClick={() => navigate('/historico')}
         onContactsClick={() => navigate('/contatos')}
-        onChatClick={() => navigate('/chat')}
         onLogout={() => {
           void clearStorage().catch(() => {})
           void sip.unregisterAndDisconnect().catch(() => {})
@@ -235,11 +247,26 @@ export default function Historico() {
                   scrollbar-color: rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05);
                 }
               `}</style>
-              <CallHistoryTable entries={filteredHistory} />
+              <CallHistoryTable 
+                entries={filteredHistory} 
+                onCall={handleCall}
+                onAddContact={handleAddContact}
+              />
             </div>
           )}
         </Card>
       </main>
+
+      <AddContactModal
+        isOpen={addContactModalOpen}
+        onClose={() => {
+          setAddContactModalOpen(false)
+          setContactToAdd(null)
+        }}
+        onSave={handleSaveContact}
+        initialName={contactToAdd?.name || ''}
+        initialNumber={contactToAdd?.number || ''}
+      />
     </div>
   )
 }

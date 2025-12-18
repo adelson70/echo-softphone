@@ -3,7 +3,6 @@ import Caller from '../pages/Caller'
 import Login from '../pages/Login'
 import Historico from '../pages/Historico'
 import Contatos from '../pages/Contatos'
-import Chat from '../pages/Chat'
 import { RequireRegistered } from '../sip/react/RequireRegistered'
 
 export default function AppRoutes() {
@@ -32,14 +31,6 @@ export default function AppRoutes() {
           element={
             <RequireRegistered>
               <Contatos />
-            </RequireRegistered>
-          }
-        />
-        <Route
-          path="/chat"
-          element={
-            <RequireRegistered>
-              <Chat />
             </RequireRegistered>
           }
         />

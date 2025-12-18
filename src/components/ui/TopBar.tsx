@@ -1,12 +1,11 @@
 import type { ReactNode } from 'react'
 
-type TopBarActive = 'dialer' | 'history' | 'contacts' | 'chat'
+type TopBarActive = 'dialer' | 'history' | 'contacts'
 
 type TopBarProps = {
   onDialerClick: () => void
   onHistoryClick: () => void
   onContactsClick: () => void
-  onChatClick: () => void
   onLogout: () => void
   active?: TopBarActive | null
 }
@@ -92,20 +91,6 @@ function DialerIcon() {
   )
 }
 
-function ChatIcon() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path
-        d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
-}
-
 function LogoutIcon() {
   return (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -160,10 +145,10 @@ function IconButton({ active, ariaLabel, title, onClick, children }: IconButtonP
   )
 }
 
-export function TopBar({ onDialerClick, onHistoryClick, onContactsClick, onChatClick, onLogout, active }: TopBarProps) {
+export function TopBar({ onDialerClick, onHistoryClick, onContactsClick, onLogout, active }: TopBarProps) {
   return (
     <header className="fixed inset-x-0 top-0 z-20 border-b border-white/5 bg-background/80 backdrop-blur">
-      <div className="mx-auto grid h-14 w-full max-w-2xl grid-cols-5 items-center px-4">
+      <div className="mx-auto grid h-14 w-full max-w-2xl grid-cols-4 items-center px-4">
         <div className="flex items-center justify-start">
           <IconButton
             ariaLabel="Discador"
@@ -194,17 +179,6 @@ export function TopBar({ onDialerClick, onHistoryClick, onContactsClick, onChatC
             active={active === 'contacts'}
           >
             <ContactsIcon />
-          </IconButton>
-        </div>
-
-        <div className="flex items-center justify-center">
-          <IconButton
-            ariaLabel="Chat"
-            title="Chat - Mensagens e conversas"
-            onClick={onChatClick}
-            active={active === 'chat'}
-          >
-            <ChatIcon />
           </IconButton>
         </div>
 

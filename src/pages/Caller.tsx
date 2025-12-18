@@ -97,10 +97,6 @@ export default function Caller() {
     navigate('/contatos')
   }
 
-  function handleChatClick() {
-    navigate('/chat')
-  }
-
   function handleTransferOpen() {
     setTransferType(null)
     setTransferTarget('')
@@ -233,7 +229,6 @@ export default function Caller() {
         onDialerClick={handleDialerClick}
         onHistoryClick={handleHistoryClick}
         onContactsClick={handleContactsClick}
-        onChatClick={handleChatClick}
         onLogout={handleLogout}
         active="dialer"
       />
