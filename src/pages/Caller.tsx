@@ -426,6 +426,8 @@ export default function Caller() {
                   className="mx-auto w-full max-w-sm"
                   onKeyPress={(k) => {
                     appendKey(k)
+                    // Toca o som do DTMF localmente (sem enviar remotamente quando não há chamada)
+                    sip.sendDtmf(k, { playLocal: true, sendRemote: false })
                   }}
                   disabled={false}
                 />

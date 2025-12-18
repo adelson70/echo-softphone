@@ -29,12 +29,20 @@ export function playLocalDtmfTone(key: string, durationMs = 150): void {
   const [f1, f2] = DTMF_FREQUENCIES[key as DtmfKey]
 
   const ctx = getAudioContext()
+  
+  if (ctx.state === 'suspended') {
+    ctx.resume().catch(() => {})
+  }
+
   const osc1 = ctx.createOscillator()
   const osc2 = ctx.createOscillator()
   const gain = ctx.createGain()
 
   osc1.frequency.value = f1
   osc2.frequency.value = f2
+  
+  // Reduz o volume para evitar som estridente (0.1 = 10% do volume máximo)
+  gain.gain.value = 0.06
 
   osc1.connect(gain)
   osc2.connect(gain)
