@@ -9,7 +9,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 export function createMainWindow(): BrowserWindow {
   const win = new BrowserWindow({
-    icon: path.join(process.env.VITE_PUBLIC, 'electron-vite.svg'),
+    icon: path.join(__dirname, 'assets', 'icon.png'),
     width: Number(process.env.WINDOW_WIDTH),
     height: Number(process.env.WINDOW_HEIGHT),
     resizable: false,
@@ -24,7 +24,7 @@ export function createMainWindow(): BrowserWindow {
     },
   })
 
-  // win.setMenuBarVisibility(false)
+  win.setMenuBarVisibility(false)
 
   // Test active push message to Renderer-process.
   win.webContents.on('did-finish-load', () => {
