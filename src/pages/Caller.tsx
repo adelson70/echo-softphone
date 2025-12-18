@@ -345,7 +345,7 @@ export default function Caller() {
         {/* Discador - apenas quando idle */}
         {!inCall ? (
           <>
-            <section className="mt-[5vh] flex-none md:mt-10">
+            <section className="mx-auto mt-[12vh] w-full max-w-sm flex-none md:mt-10">
               <DialInput value={dialValue} onChange={handleDialChange} autoFocus disabled={inCall} />
             </section>
 
