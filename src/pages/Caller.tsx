@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useMemo, useState } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { TopBar } from '../components/ui/TopBar'
 import { useSip } from '../sip/react/useSip'
 import { clearStorage } from '../services/storageService'
@@ -7,10 +7,12 @@ import { IdleState } from '../components/caller/IdleState'
 import { EstablishedState } from '../components/caller/EstablishedState'
 import { IncomingState } from '../components/caller/IncomingState'
 import { OutgoingState } from '../components/caller/OutgoingState'
+import { setCurrentDialNumber } from '../sip/react/useCallHistory'
 
 export default function Caller() {
   const navigate = useNavigate()
   const sip = useSip()
+  const [searchParams, setSearchParams] = useSearchParams()
 
   const [dialValue, setDialValue] = useState('')
   const [showKeypad, setShowKeypad] = useState(false)
@@ -40,6 +42,15 @@ export default function Caller() {
     return undefined
   }, [isEstablished, sip.snapshot.callDirection, sip.snapshot.incoming])
 
+  // Suporte a query param ?number=XXX para pré-preencher número
+  useEffect(() => {
+    const numberParam = searchParams.get('number')
+    if (numberParam) {
+      setDialValue(numberParam)
+      setSearchParams({}, { replace: true }) // Remove o param após usar
+    }
+  }, [searchParams, setSearchParams])
+
   function appendKey(key: string) {
     setDialValue((prev) => (prev + key).slice(0, 128))
   }
@@ -50,6 +61,7 @@ export default function Caller() {
 
   async function handleCall() {
     if (!canCall) return
+    setCurrentDialNumber(dialValue) // Armazena o número para o histórico
     await sip.startCall(dialValue)
   }
 
@@ -73,12 +85,20 @@ export default function Caller() {
     setShowKeypad((prev) => !prev)
   }
 
+  function handleDialerClick() {
+    navigate('/caller')
+  }
+
   function handleHistoryClick() {
     navigate('/historico')
   }
 
   function handleContactsClick() {
     navigate('/contatos')
+  }
+
+  function handleChatClick() {
+    navigate('/chat')
   }
 
   function handleTransferOpen() {
@@ -210,9 +230,12 @@ export default function Caller() {
         </div>
       )}
       <TopBar
+        onDialerClick={handleDialerClick}
         onHistoryClick={handleHistoryClick}
         onContactsClick={handleContactsClick}
+        onChatClick={handleChatClick}
         onLogout={handleLogout}
+        active="dialer"
       />
 
       <main className="mx-auto flex h-full min-h-0 max-w-2xl flex-col overflow-hidden px-4 pb-6 pt-24">
@@ -267,7 +290,7 @@ export default function Caller() {
             canCall={canCall}
             inCall={inCall}
             isRegistered={sip.snapshot.connection === 'registered'}
-            showKeypad={showKeypad}
+            showKeypad={true}
           />
         )}
           

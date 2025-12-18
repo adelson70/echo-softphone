@@ -4,14 +4,14 @@ import { Card } from '../components/ui/Card'
 import { useSip } from '../sip/react/useSip'
 import { clearStorage } from '../services/storageService'
 
-export default function Contatos() {
+export default function Chat() {
   const navigate = useNavigate()
   const sip = useSip()
 
   return (
     <div className="h-screen overflow-hidden bg-background text-text">
       <TopBar
-        active="contacts"
+        active="chat"
         onDialerClick={() => navigate('/caller')}
         onHistoryClick={() => navigate('/historico')}
         onContactsClick={() => navigate('/contatos')}
@@ -25,15 +25,15 @@ export default function Contatos() {
 
       <main className="mx-auto h-full max-w-2xl px-4 pb-6 pt-16">
         <div className="space-y-1">
-          <h1 className="text-xl font-semibold tracking-tight">Contatos</h1>
-          <p className="text-sm text-muted">Agenda do softphone (UI apenas).</p>
+          <h1 className="text-xl font-semibold tracking-tight">Chat</h1>
+          <p className="text-sm text-muted">Mensagens do softphone (UI apenas).</p>
         </div>
 
         <Card className="mt-6 border border-white/5 p-5">
           <div className="space-y-2">
-            <h2 className="text-sm font-semibold text-text">Sem contatos</h2>
+            <h2 className="text-sm font-semibold text-text">Sem mensagens</h2>
             <p className="text-sm text-muted">
-              Esta página é dedicada à agenda. A integração real (SIP/CRM) não está implementada.
+              Esta página é dedicada ao chat. A integração real (SIP/CRM) não está implementada.
             </p>
           </div>
         </Card>
@@ -41,5 +41,4 @@ export default function Contatos() {
     </div>
   )
 }
-
 

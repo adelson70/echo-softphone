@@ -5,6 +5,7 @@ import { SipClient } from '../core/sipClient'
 import { bindRemoteAudio } from '../media/audioBinding'
 import { handleDtmf } from '../media/dtmf'
 import { useCallAudioFeedback } from './useCallAudioFeedback'
+import { useCallHistory } from './useCallHistory'
 
 export type SipContextValue = {
   snapshot: SipClientSnapshot
@@ -89,6 +90,9 @@ export function SipProvider({ children }: PropsWithChildren) {
 
   // Sons de feedback de chamada
   useCallAudioFeedback(snapshot)
+
+  // Histórico de chamadas
+  useCallHistory({ snapshot })
 
   const value = useMemo<SipContextValue>(() => {
     const client = clientRef.current!
