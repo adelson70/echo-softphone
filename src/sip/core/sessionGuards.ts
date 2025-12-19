@@ -23,7 +23,9 @@ export function canCancel(inviter: Inviter | undefined): boolean {
 
 export function canReject(invitation: Invitation | undefined): boolean {
   if (!invitation) return false
-  return invitation.state === SessionState.Establishing
+  // Permite rejeitar em estados anteriores a Established (Initial e Establishing)
+  // Uma invitation pode ser rejeitada enquanto não estiver Established ou Terminated
+  return invitation.state !== SessionState.Established && invitation.state !== SessionState.Terminated
 }
 
 

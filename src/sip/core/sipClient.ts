@@ -354,10 +354,28 @@ export class SipClient {
   }
 
   async reject(): Promise<void> {
-    if (!this.invitation) throw new Error('Nenhuma chamada recebida')
-    if (!canReject(this.invitation)) return
-    await this.invitation.reject({ statusCode: 486, reasonPhrase: 'Rejected' }).catch(() => {})
-    this.clearCallState()
+    if (!this.invitation) {
+      console.error('[SIP] reject(): Nenhuma chamada recebida')
+      throw new Error('Nenhuma chamada recebida')
+    }
+    
+    if (!canReject(this.invitation)) {
+      console.warn('[SIP] reject(): Não é possível rejeitar a chamada. Estado atual:', this.invitation.state)
+      // Mesmo assim, limpa o estado para evitar que a UI fique presa
+      this.clearCallState()
+      return
+    }
+    
+    console.log('[SIP] reject(): Rejeitando chamada incoming. Estado:', this.invitation.state)
+    try {
+      await this.invitation.reject({ statusCode: 486, reasonPhrase: 'Rejected' })
+      console.log('[SIP] reject(): Chamada rejeitada com sucesso')
+    } catch (error) {
+      console.error('[SIP] reject(): Erro ao rejeitar chamada:', error)
+    } finally {
+      // Garante que o estado seja limpo mesmo em caso de erro
+      this.clearCallState()
+    }
   }
 
   /**
