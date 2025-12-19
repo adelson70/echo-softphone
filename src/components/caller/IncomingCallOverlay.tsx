@@ -1,9 +1,10 @@
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useSip } from '../../sip/react/useSip'
 import { IncomingState } from './IncomingState'
 
 export function IncomingCallOverlay() {
   const location = useLocation()
+  const navigate = useNavigate()
   const sip = useSip()
   
   const isIncoming = sip.snapshot.callStatus === 'incoming'
@@ -25,6 +26,10 @@ export function IncomingCallOverlay() {
   async function handleAnswer() {
     try {
       await sip.answer()
+      // Navega para a tela de discagem após aceitar a chamada (exceto se estiver na página de login)
+      if (!isLoginPage) {
+        navigate('/caller')
+      }
     } catch (error) {
       console.error('Erro ao atender chamada:', error)
     }
