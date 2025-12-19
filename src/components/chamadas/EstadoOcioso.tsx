@@ -1,9 +1,9 @@
 import { PhoneCall, PhoneOff } from 'lucide-react'
-import { DialInput } from '../ui/DialInput'
-import { DialPad } from '../ui/DialPad'
-import { ActionButton } from '../ui/ActionButton'
+import { DialInput } from '../ui/EntradaDiscagem'
+import { DialPad } from '../ui/TecladoDiscagem'
+import { ActionButton } from '../ui/BotaoAcao'
 
-type IdleStateProps = {
+type PropsEstadoOcioso = {
   dialValue: string
   onDialChange: (value: string) => void
   onKeyPress: (key: string) => void
@@ -25,7 +25,7 @@ export function IdleState({
   inCall,
   isRegistered,
   showKeypad = true,
-}: IdleStateProps) {
+}: PropsEstadoOcioso) {
   return (
     <section className="mt-8 flex min-h-0 flex-1 w-full flex-col items-stretch justify-end gap-6">
       <DialInput value={dialValue} onChange={onDialChange} autoFocus disabled={inCall} />

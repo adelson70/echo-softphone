@@ -1,5 +1,5 @@
 import type { SipConfig } from '../../../electron/store'
-import { getStorage, setStorage } from '../../services/storageService'
+import { getStorage, setStorage } from '../../services/servicoArmazenamento'
 
 const SIP_KEY = 'sip'
 

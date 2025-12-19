@@ -1,4 +1,4 @@
-type CallDialButtonProps = {
+type PropsBotaoDiscarChamada = {
   label: string
   letters?: string
   onClick: () => void
@@ -10,7 +10,7 @@ function cx(...classes: Array<string | undefined | false>) {
   return classes.filter(Boolean).join(' ')
 }
 
-export function CallDialButton({ label, letters, onClick, className, disabled }: CallDialButtonProps) {
+export function CallDialButton({ label, letters, onClick, className, disabled }: PropsBotaoDiscarChamada) {
   return (
     <button
       type="button"

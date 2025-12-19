@@ -1,13 +1,13 @@
 import { Avatar } from '../ui/Avatar'
-import { HangupButton } from './HangupButton'
+import { HangupButton } from './BotaoDesligar'
 
-type OutgoingStateProps = {
+type PropsEstadoSaindo = {
   dialValue: string
   callStatus: 'dialing' | 'ringing'
   onHangup: () => void
 }
 
-export function OutgoingState({ dialValue, callStatus, onHangup }: OutgoingStateProps) {
+export function OutgoingState({ dialValue, callStatus, onHangup }: PropsEstadoSaindo) {
   const statusText = callStatus === 'dialing' ? 'Chamando...' : 'Tocando...'
 
   return (

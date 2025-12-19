@@ -1,9 +1,9 @@
 import { ArrowRight, Grid3x3, Mic, MicOff, PhoneCall, Repeat, Volume2 } from 'lucide-react'
-import { CallKeypad } from './CallKeypad'
+import { CallKeypad } from './TecladoChamada'
 import { Avatar } from '../ui/Avatar'
-import { HangupButton } from './HangupButton'
+import { HangupButton } from './BotaoDesligar'
 
-type EstablishedStateProps = {
+type PropsEstadoEstabelecido = {
   callDurationSec: number
   contactNumber: string
   contactName?: string
@@ -41,7 +41,7 @@ export function EstablishedState({
   onSendDtmf,
   onHangup,
   isMuted,
-}: EstablishedStateProps) {
+}: PropsEstadoEstabelecido) {
   const displayName = contactName || contactNumber
 
   return (

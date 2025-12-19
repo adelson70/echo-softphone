@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import type { SipClientSnapshot } from '../types'
-import { addCallEntry, updateCallEntry, type CallHistoryEntry } from '../../services/historyService'
+import { addCallEntry, updateCallEntry, type CallHistoryEntry } from '../../services/servicoHistorico'
 
 type UseCallHistoryOptions = {
   snapshot: SipClientSnapshot

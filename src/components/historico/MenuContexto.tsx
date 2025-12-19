@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 
-type ContextMenuProps = {
+type PropsMenuContexto = {
   x: number
   y: number
   onClose: () => void
   onAddContact: () => void
 }
 
-export function ContextMenu({ x, y, onClose, onAddContact }: ContextMenuProps) {
+export function ContextMenu({ x, y, onClose, onAddContact }: PropsMenuContexto) {
   const menuRef = useRef<HTMLDivElement>(null)
   const [position, setPosition] = useState({ x, y })
 

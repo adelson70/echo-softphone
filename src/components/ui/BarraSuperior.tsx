@@ -1,13 +1,13 @@
 import type { ReactNode } from 'react'
 
-type TopBarActive = 'dialer' | 'history' | 'contacts'
+type BarraSuperiorAtivo = 'dialer' | 'history' | 'contacts'
 
-type TopBarProps = {
+type PropsBarraSuperior = {
   onDialerClick: () => void
   onHistoryClick: () => void
   onContactsClick: () => void
   onLogout: () => void
-  active?: TopBarActive | null
+  active?: BarraSuperiorAtivo | null
 }
 
 function cx(...classes: Array<string | undefined | false>) {
@@ -118,7 +118,7 @@ function LogoutIcon() {
   )
 }
 
-type IconButtonProps = {
+type PropsBotaoIcone = {
   active?: boolean
   ariaLabel: string
   title?: string
@@ -126,7 +126,7 @@ type IconButtonProps = {
   children: ReactNode
 }
 
-function IconButton({ active, ariaLabel, title, onClick, children }: IconButtonProps) {
+function IconButton({ active, ariaLabel, title, onClick, children }: PropsBotaoIcone) {
   return (
     <button
       type="button"
@@ -145,7 +145,7 @@ function IconButton({ active, ariaLabel, title, onClick, children }: IconButtonP
   )
 }
 
-export function TopBar({ onDialerClick, onHistoryClick, onContactsClick, onLogout, active }: TopBarProps) {
+export function TopBar({ onDialerClick, onHistoryClick, onContactsClick, onLogout, active }: PropsBarraSuperior) {
   return (
     <header className="fixed inset-x-0 top-0 z-20 border-b border-white/5 bg-background/80 backdrop-blur">
       <div className="mx-auto grid h-14 w-full max-w-2xl grid-cols-4 items-center px-4">

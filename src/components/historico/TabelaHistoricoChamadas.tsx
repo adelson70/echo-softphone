@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import type { CallHistoryEntry } from '../../services/historyService'
-import { ContextMenu } from './ContextMenu'
+import type { CallHistoryEntry } from '../../services/servicoHistorico'
+import { ContextMenu } from './MenuContexto'
 
-type CallHistoryTableProps = {
+type PropsTabelaHistoricoChamadas = {
   entries: CallHistoryEntry[]
   onCall?: (number: string) => void
   onAddContact?: (number: string, name?: string) => void
@@ -152,7 +152,7 @@ function getTooltipContent(entry: CallHistoryEntry): string {
   return lines.join('\n')
 }
 
-export function CallHistoryTable({ entries, onCall, onAddContact }: CallHistoryTableProps) {
+export function CallHistoryTable({ entries, onCall, onAddContact }: PropsTabelaHistoricoChamadas) {
   const [contextMenu, setContextMenu] = useState<{
     x: number
     y: number

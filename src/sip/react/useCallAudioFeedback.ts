@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import type { SipClientSnapshot } from '../types'
-import { audioFeedbackService } from '../../services/audioFeedbackService'
+import { audioFeedbackService } from '../../services/servicoFeedbackAudio'
 
 /**
  * Hook que monitora estados de chamada SIP e toca sons de feedback apropriados.

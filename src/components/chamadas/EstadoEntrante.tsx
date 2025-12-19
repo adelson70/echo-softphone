@@ -1,20 +1,20 @@
 import { Avatar } from '../ui/Avatar'
-import { AnswerButton } from './AnswerButton'
-import { HangupButton } from './HangupButton'
+import { AnswerButton } from './BotaoAtender'
+import { HangupButton } from './BotaoDesligar'
 
-type IncomingCallInfo = {
+type InfoChamadaEntrante = {
   displayName?: string
   user?: string
   uri?: string
 }
 
-type IncomingStateProps = {
-  incomingCall: IncomingCallInfo | null
+type PropsEstadoEntrante = {
+  incomingCall: InfoChamadaEntrante | null
   onAnswer: () => void
   onReject: () => void
 }
 
-export function IncomingState({ incomingCall, onAnswer, onReject }: IncomingStateProps) {
+export function IncomingState({ incomingCall, onAnswer, onReject }: PropsEstadoEntrante) {
   const displayName =
     incomingCall?.displayName ?? incomingCall?.user ?? 'Desconhecido'
   const number = incomingCall?.user ?? incomingCall?.uri ?? ''

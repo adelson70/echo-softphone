@@ -1,7 +1,7 @@
 import type React from 'react'
-import { PhoneCall } from 'lucide-react'
+import { PhoneOff } from 'lucide-react'
 
-type AnswerButtonProps = {
+type PropsBotaoDesligar = {
   onClick: (e?: React.MouseEvent<HTMLButtonElement>) => void
   disabled?: boolean
   ariaLabel?: string
@@ -25,13 +25,13 @@ function cx(...classes: Array<string | undefined | false>) {
   return classes.filter(Boolean).join(' ')
 }
 
-export function AnswerButton({
+export function HangupButton({
   onClick,
   disabled = false,
-  ariaLabel = 'Atender',
+  ariaLabel = 'Encerrar',
   className,
   size = 'md',
-}: AnswerButtonProps) {
+}: PropsBotaoDesligar) {
   const sizeClass = sizeClasses[size]
   const iconSize = iconSizes[size]
 
@@ -42,15 +42,15 @@ export function AnswerButton({
       disabled={disabled}
       aria-label={ariaLabel}
       className={cx(
-        'flex items-center justify-center rounded-full bg-success text-background transition-colors',
-        'hover:bg-success/90',
+        'flex items-center justify-center rounded-full bg-danger text-background transition-colors',
+        'hover:bg-danger/90',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background',
         'disabled:pointer-events-none disabled:opacity-50',
         sizeClass,
         className
       )}
     >
-      <PhoneCall size={iconSize} strokeWidth={2.5} />
+      <PhoneOff size={iconSize} strokeWidth={2.5} />
     </button>
   )
 }

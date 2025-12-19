@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 
-type AddContactModalProps = {
+type PropsModalAdicionarContato = {
   isOpen: boolean
   onClose: () => void
   onSave: (name: string, number: string) => Promise<void>
@@ -14,7 +14,7 @@ export function AddContactModal({
   onSave,
   initialName = '',
   initialNumber = '',
-}: AddContactModalProps) {
+}: PropsModalAdicionarContato) {
   const [name, setName] = useState(initialName)
   const [number, setNumber] = useState(initialNumber)
   const [isSaving, setIsSaving] = useState(false)

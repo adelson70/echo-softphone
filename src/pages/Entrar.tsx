@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Card } from '../components/ui/Card'
-import { Button } from '../components/ui/Button'
-import { InputText } from '../components/ui/InputText'
-import { InputPassword } from '../components/ui/InputPassword'
+import { Card } from '../components/ui/Cartao'
+import { Button } from '../components/ui/Botao'
+import { InputText } from '../components/ui/EntradaTexto'
+import { InputPassword } from '../components/ui/EntradaSenha'
 import { loadSipConfig, saveSipConfig } from '../sip/config/sipConfigStore'
 import { useSip } from '../sip/react/useSip'
 import { useNavigate } from 'react-router-dom'
@@ -74,7 +74,7 @@ function GlobeIcon() {
   )
 }
 
-export default function Login() {
+export default function Entrar() {
   const navigate = useNavigate()
   const sip = useSip()
   const autoTriedRef = useRef(false)
@@ -100,7 +100,7 @@ export default function Login() {
   // Auto-registro: se houver credenciais salvas, tenta registrar e leva para Caller.
   useEffect(() => {
     if (sip.snapshot.connection === 'registered') {
-      navigate('/caller')
+      navigate('/discador')
       return
     }
     if (autoTriedRef.current) return
@@ -117,7 +117,7 @@ export default function Login() {
           password: cfg.password,
           server: cfg.server,
         })
-        navigate('/caller')
+        navigate('/discador')
       } catch {
         // Falhou -> fica no login para o usuário corrigir dados
       } finally {
@@ -146,7 +146,7 @@ export default function Login() {
         server: sipDomain.trim(),
         status: 'online',
       })
-      navigate('/caller')
+      navigate('/discador')
     } catch (err: any) {
       setError(err?.message ?? 'Falha no registro')
     } finally {

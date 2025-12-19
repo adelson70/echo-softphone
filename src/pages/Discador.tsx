@@ -1,70 +1,70 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { TopBar } from '../components/ui/TopBar'
+import { TopBar } from '../components/ui/BarraSuperior'
 import { useSip } from '../sip/react/useSip'
-import { clearStorage } from '../services/storageService'
-import { IdleState } from '../components/caller/IdleState'
-import { EstablishedState } from '../components/caller/EstablishedState'
-import { OutgoingState } from '../components/caller/OutgoingState'
+import { clearStorage } from '../services/servicoArmazenamento'
+import { IdleState } from '../components/chamadas/EstadoOcioso'
+import { EstablishedState } from '../components/chamadas/EstadoEstabelecido'
+import { OutgoingState } from '../components/chamadas/EstadoSaindo'
 import { setCurrentDialNumber } from '../sip/react/useCallHistory'
 
-export default function Caller() {
+export default function Discador() {
   const navigate = useNavigate()
   const sip = useSip()
   const [searchParams, setSearchParams] = useSearchParams()
 
-  const [dialValue, setDialValue] = useState('')
-  const [showKeypad, setShowKeypad] = useState(false)
-  const [transferModalOpen, setTransferModalOpen] = useState(false)
-  const [transferType, setTransferType] = useState<'assisted' | 'blind' | null>(null)
-  const [transferTarget, setTransferTarget] = useState('')
+  const [valorDiscagem, setValorDiscagem] = useState('')
+  const [mostrarTeclado, setMostrarTeclado] = useState(false)
+  const [modalTransferenciaAberto, setModalTransferenciaAberto] = useState(false)
+  const [tipoTransferencia, setTipoTransferencia] = useState<'assisted' | 'blind' | null>(null)
+  const [destinoTransferencia, setDestinoTransferencia] = useState('')
 
-  const canCall = useMemo(() => dialValue.trim().length > 0, [dialValue])
-  const inCall = sip.snapshot.callStatus !== 'idle'
-  const isEstablished = sip.snapshot.callStatus === 'established'
-  const isIncoming = sip.snapshot.callStatus === 'incoming'
-  const isOutgoing = sip.snapshot.callStatus === 'dialing' || sip.snapshot.callStatus === 'ringing'
+  const podeChamar = useMemo(() => valorDiscagem.trim().length > 0, [valorDiscagem])
+  const emChamada = sip.snapshot.callStatus !== 'idle'
+  const estaEstabelecido = sip.snapshot.callStatus === 'established'
+  const estaEntrando = sip.snapshot.callStatus === 'incoming'
+  const estaSaindo = sip.snapshot.callStatus === 'dialing' || sip.snapshot.callStatus === 'ringing'
 
-  const establishedContactNumber = useMemo(() => {
-    if (!isEstablished) return null
+  const numeroContatoEstabelecido = useMemo(() => {
+    if (!estaEstabelecido) return null
     if (sip.snapshot.callDirection === 'incoming') {
       return sip.snapshot.incoming?.user ?? sip.snapshot.incoming?.uri ?? ''
     }
-    return dialValue || ''
-  }, [isEstablished, sip.snapshot.callDirection, sip.snapshot.incoming, dialValue])
+    return valorDiscagem || ''
+  }, [estaEstabelecido, sip.snapshot.callDirection, sip.snapshot.incoming, valorDiscagem])
 
-  const establishedContactName = useMemo(() => {
-    if (!isEstablished) return undefined
+  const nomeContatoEstabelecido = useMemo(() => {
+    if (!estaEstabelecido) return undefined
     if (sip.snapshot.callDirection === 'incoming') {
       return sip.snapshot.incoming?.displayName ?? undefined
     }
     return undefined
-  }, [isEstablished, sip.snapshot.callDirection, sip.snapshot.incoming])
+  }, [estaEstabelecido, sip.snapshot.callDirection, sip.snapshot.incoming])
 
   // Suporte a query param ?number=XXX para pré-preencher número
   useEffect(() => {
-    const numberParam = searchParams.get('number')
-    if (numberParam) {
-      setDialValue(numberParam)
+    const parametroNumero = searchParams.get('number')
+    if (parametroNumero) {
+      setValorDiscagem(parametroNumero)
       setSearchParams({}, { replace: true }) // Remove o param após usar
     }
   }, [searchParams, setSearchParams])
 
-  function appendKey(key: string) {
-    setDialValue((prev) => (prev + key).slice(0, 128))
+  function adicionarTecla(tecla: string) {
+    setValorDiscagem((prev) => (prev + tecla).slice(0, 128))
   }
 
-  function handleDialChange(next: string) {
-    setDialValue(next.slice(0, 128))
+  function lidarComMudancaDiscagem(proximo: string) {
+    setValorDiscagem(proximo.slice(0, 128))
   }
 
-  async function handleCall() {
-    if (!canCall) return
-    setCurrentDialNumber(dialValue) // Armazena o número para o histórico
-    await sip.startCall(dialValue)
+  async function lidarComChamada() {
+    if (!podeChamar) return
+    setCurrentDialNumber(valorDiscagem) // Armazena o número para o histórico
+    await sip.startCall(valorDiscagem)
   }
 
-  async function handleHangup() {
+  async function lidarComDesligar() {
     try {
       await sip.hangup()
     } catch (error) {
@@ -72,7 +72,7 @@ export default function Caller() {
     }
   }
 
-  function handleToggleMute() {
+  function lidarComAlternarMudo() {
     try {
       sip.toggleMute()
     } catch (error) {
@@ -80,50 +80,50 @@ export default function Caller() {
     }
   }
 
-  function handleToggleKeypad() {
-    setShowKeypad((prev) => !prev)
+  function lidarComAlternarTeclado() {
+    setMostrarTeclado((prev) => !prev)
   }
 
-  function handleDialerClick() {
-    navigate('/caller')
+  function lidarComCliqueDiscador() {
+    navigate('/discador')
   }
 
-  function handleHistoryClick() {
+  function lidarComCliqueHistorico() {
     navigate('/historico')
   }
 
-  function handleContactsClick() {
+  function lidarComCliqueContatos() {
     navigate('/contatos')
   }
 
-  function handleTransferOpen() {
-    setTransferType(null)
-    setTransferTarget('')
-    setTransferModalOpen(true)
+  function lidarComAbrirTransferencia() {
+    setTipoTransferencia(null)
+    setDestinoTransferencia('')
+    setModalTransferenciaAberto(true)
   }
 
-  function handleTransferClose() {
-    setTransferModalOpen(false)
-    setTransferType(null)
-    setTransferTarget('')
+  function lidarComFecharTransferencia() {
+    setModalTransferenciaAberto(false)
+    setTipoTransferencia(null)
+    setDestinoTransferencia('')
   }
 
-  async function handleTransferConfirm() {
-    if (!transferType || !transferTarget.trim()) return
+  async function lidarComConfirmarTransferencia() {
+    if (!tipoTransferencia || !destinoTransferencia.trim()) return
 
     try {
-      if (transferType === 'assisted') {
-        await sip.transferAttended(transferTarget.trim())
+      if (tipoTransferencia === 'assisted') {
+        await sip.transferAttended(destinoTransferencia.trim())
       } else {
-        await sip.transferBlind(transferTarget.trim())
+        await sip.transferBlind(destinoTransferencia.trim())
       }
-      handleTransferClose()
+      lidarComFecharTransferencia()
     } catch (error) {
       console.error('Erro ao transferir chamada:', error)
     }
   }
 
-  async function handleLogout() {
+  async function lidarComSair() {
     // Limpa credenciais/config no store para não auto-reconectar
     await clearStorage().catch(() => {})
 
@@ -136,19 +136,19 @@ export default function Caller() {
   }
 
 
-  const connectedAs = sip.snapshot.identity
+  const conectadoComo = sip.snapshot.identity
     ? `${sip.snapshot.identity.username}@${sip.snapshot.identity.domain}`
     : ''
 
   return (
     <div className="h-screen overflow-hidden bg-background text-text">
       {/* Modal de Transferência */}
-      {transferModalOpen && (
+      {modalTransferenciaAberto && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
           <div className="mx-4 w-full max-w-sm rounded-2xl border border-white/10 bg-background p-6 shadow-xl">
             <h3 className="mb-4 text-lg font-semibold text-text">Transferir Chamada</h3>
 
-            {!transferType ? (
+            {!tipoTransferencia ? (
               <>
                 <p className="mb-4 text-sm text-muted">
                   Escolha o tipo de transferência:
@@ -156,14 +156,14 @@ export default function Caller() {
                 <div className="mb-4 flex flex-col gap-3">
                   <button
                     type="button"
-                    onClick={() => setTransferType('assisted')}
+                    onClick={() => setTipoTransferencia('assisted')}
                     className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-text transition-colors hover:bg-white/10"
                   >
                     Transferência Assistida
                   </button>
                   <button
                     type="button"
-                    onClick={() => setTransferType('blind')}
+                    onClick={() => setTipoTransferencia('blind')}
                     className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-text transition-colors hover:bg-white/10"
                   >
                     Transferência Cega
@@ -171,7 +171,7 @@ export default function Caller() {
                 </div>
                 <button
                   type="button"
-                  onClick={handleTransferClose}
+                  onClick={lidarComFecharTransferencia}
                   className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-text transition-colors hover:bg-white/10"
                 >
                   Cancelar
@@ -180,19 +180,19 @@ export default function Caller() {
             ) : (
               <>
                 <p className="mb-4 text-sm text-muted">
-                  {transferType === 'assisted'
+                  {tipoTransferencia === 'assisted'
                     ? 'Digite o número ou extensão para transferência assistida:'
                     : 'Digite o número ou extensão para transferência cega:'}
                 </p>
                 <input
                   type="text"
-                  value={transferTarget}
-                  onChange={(e) => setTransferTarget(e.target.value)}
+                  value={destinoTransferencia}
+                  onChange={(e) => setDestinoTransferencia(e.target.value)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
-                      void handleTransferConfirm()
+                      void lidarComConfirmarTransferencia()
                     } else if (e.key === 'Escape') {
-                      handleTransferClose()
+                      lidarComFecharTransferencia()
                     }
                   }}
                   placeholder="Número destino"
@@ -203,8 +203,8 @@ export default function Caller() {
                   <button
                     type="button"
                     onClick={() => {
-                      setTransferType(null)
-                      setTransferTarget('')
+                      setTipoTransferencia(null)
+                      setDestinoTransferencia('')
                     }}
                     className="flex-1 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-text transition-colors hover:bg-white/10"
                   >
@@ -212,8 +212,8 @@ export default function Caller() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => void handleTransferConfirm()}
-                    disabled={!transferTarget.trim()}
+                    onClick={() => void lidarComConfirmarTransferencia()}
+                    disabled={!destinoTransferencia.trim()}
                     className="flex-1 rounded-xl bg-primary px-4 py-3 text-sm font-medium text-background transition-colors hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Transferir
@@ -224,61 +224,61 @@ export default function Caller() {
           </div>
         </div>
       )}
-      {!isIncoming && (
+      {!estaEntrando && (
         <TopBar
-          onDialerClick={handleDialerClick}
-          onHistoryClick={handleHistoryClick}
-          onContactsClick={handleContactsClick}
-          onLogout={handleLogout}
+          onDialerClick={lidarComCliqueDiscador}
+          onHistoryClick={lidarComCliqueHistorico}
+          onContactsClick={lidarComCliqueContatos}
+          onLogout={lidarComSair}
           active="dialer"
         />
       )}
 
       <main className="mx-auto flex h-full min-h-0 max-w-2xl flex-col overflow-hidden px-4 pb-6 pt-24">
         {/* Status centralizado no topo (não atrapalha o input) */}
-        {!inCall ? (
+        {!emChamada ? (
           <div className="fixed top-16 left-1/2 z-30 -translate-x-1/2 text-center">
             <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-background/80 px-3 py-2 text-xs text-text backdrop-blur">
               <span className="h-2.5 w-2.5 rounded-full bg-success" aria-hidden="true" />
-              <span className="font-semibold">{connectedAs || 'Conectado'}</span>
+              <span className="font-semibold">{conectadoComo || 'Conectado'}</span>
             </div>
           </div>
         ) : null}
 
         {/* Renderização dinâmica dos estados */}
-        {isEstablished ? (
+        {estaEstabelecido ? (
          <EstablishedState
           callDurationSec={sip.callDurationSec}
-          contactNumber={establishedContactNumber || ''}
-          contactName={establishedContactName}
+          contactNumber={numeroContatoEstabelecido || ''}
+          contactName={nomeContatoEstabelecido}
           speakerOn={sip.speakerOn}
           onToggleSpeaker={sip.toggleSpeaker}
-          showKeypad={showKeypad}
-          onToggleKeypad={handleToggleKeypad}
-          onTransferOpen={handleTransferOpen}
-          onToggleMute={handleToggleMute}
+          showKeypad={mostrarTeclado}
+          onToggleKeypad={lidarComAlternarTeclado}
+          onTransferOpen={lidarComAbrirTransferencia}
+          onToggleMute={lidarComAlternarMudo}
           onSendDtmf={(k) => sip.sendDtmf(k, { playLocal: true, sendRemote: true })}
-          onHangup={() => void handleHangup()}
+          onHangup={() => void lidarComDesligar()}
           isMuted={sip.snapshot.muted ?? false}
         />
-        ) : isOutgoing ? (
+        ) : estaSaindo ? (
           <OutgoingState
-            dialValue={dialValue}
+            dialValue={valorDiscagem}
             callStatus={sip.snapshot.callStatus === 'dialing' ? 'dialing' : 'ringing'}
             onHangup={() => void sip.hangup()}
           />
         ) : (
           <IdleState
-            dialValue={dialValue}
-            onDialChange={handleDialChange}
+            dialValue={valorDiscagem}
+            onDialChange={lidarComMudancaDiscagem}
             onKeyPress={(k) => {
-              appendKey(k)
+              adicionarTecla(k)
               sip.sendDtmf(k, { playLocal: true, sendRemote: false })
             }}
-            onCall={handleCall}
-            onHangup={handleHangup}
-            canCall={canCall}
-            inCall={inCall}
+            onCall={lidarComChamada}
+            onHangup={lidarComDesligar}
+            canCall={podeChamar}
+            inCall={emChamada}
             isRegistered={sip.snapshot.connection === 'registered'}
             showKeypad={true}
           />

@@ -1,21 +1,21 @@
 import { HashRouter, Routes, Route } from 'react-router-dom'
-import Caller from '../pages/Caller'
-import Login from '../pages/Login'
+import Discador from '../pages/Discador'
+import Entrar from '../pages/Entrar'
 import Historico from '../pages/Historico'
 import Contatos from '../pages/Contatos'
 import { RequireRegistered } from '../sip/react/RequireRegistered'
-import { IncomingCallOverlay } from '../components/caller/IncomingCallOverlay'
+import { IncomingCallOverlay } from '../components/chamadas/OverlayChamadaEntrante'
 
 export default function AppRoutes() {
   return (
     <HashRouter>
       <Routes>
-        <Route path="/" element={<Login />} />
+        <Route path="/" element={<Entrar />} />
         <Route
-          path="/caller"
+          path="/discador"
           element={
             <RequireRegistered>
-              <Caller />
+              <Discador />
             </RequireRegistered>
           }
         />

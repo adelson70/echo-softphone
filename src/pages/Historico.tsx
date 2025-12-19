@@ -1,13 +1,13 @@
 import { useEffect, useState, useMemo, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { TopBar } from '../components/ui/TopBar'
-import { Card } from '../components/ui/Card'
+import { TopBar } from '../components/ui/BarraSuperior'
+import { Card } from '../components/ui/Cartao'
 import { useSip } from '../sip/react/useSip'
-import { clearStorage } from '../services/storageService'
-import { getCallHistory, clearCallHistory, type CallHistoryEntry } from '../services/historyService'
-import { CallHistoryTable } from '../components/history/CallHistoryTable'
-import { addContact } from '../services/contactService'
-import { AddContactModal } from '../components/contacts/AddContactModal'
+import { clearStorage } from '../services/servicoArmazenamento'
+import { getCallHistory, clearCallHistory, type CallHistoryEntry } from '../services/servicoHistorico'
+import { CallHistoryTable } from '../components/historico/TabelaHistoricoChamadas'
+import { addContact } from '../services/servicoContatos'
+import { AddContactModal } from '../components/contacts/ModalAdicionarContato'
 
 function TrashIcon() {
   return (
@@ -59,10 +59,10 @@ export default function Historico() {
   function handleCall(number: string) {
     // Se não houver chamada ativa, navega para o discador com o número pré-preenchido
     if (sip.snapshot.callStatus === 'idle') {
-      navigate(`/caller?number=${encodeURIComponent(number)}`)
+      navigate(`/discador?number=${encodeURIComponent(number)}`)
     } else {
       // Se houver chamada ativa, apenas navega (usuário pode encerrar e ligar depois)
-      navigate('/caller')
+      navigate('/discador')
     }
   }
 
@@ -133,7 +133,7 @@ export default function Historico() {
       {!isIncoming && (
         <TopBar
           active="history"
-          onDialerClick={() => navigate('/caller')}
+          onDialerClick={() => navigate('/discador')}
           onHistoryClick={() => navigate('/historico')}
           onContactsClick={() => navigate('/contatos')}
           onLogout={() => {

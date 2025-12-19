@@ -1,9 +1,10 @@
-import { CallDialButton } from './CallDialButton'
+import { DialButton } from './BotaoDiscar'
 
-type CallKeypadProps = {
+type DialPadProps = {
   onKeyPress: (key: string) => void
   className?: string
   disabled?: boolean
+  size?: 'default' | 'small'
 }
 
 const KEYPAD_KEYS: Array<{ key: string; letters?: string }> = [
@@ -25,19 +26,21 @@ function cx(...classes: Array<string | undefined | false>) {
   return classes.filter(Boolean).join(' ')
 }
 
-export function CallKeypad({ onKeyPress, className, disabled }: CallKeypadProps) {
+export function DialPad({ onKeyPress, className, disabled, size = 'default' }: DialPadProps) {
   return (
-    <div className={cx('grid w-full grid-cols-3 gap-1.5', className)} role="group" aria-label="Discador numérico para ligação">
+    <div className={cx('grid w-full grid-cols-3 gap-4', className)} role="group" aria-label="Discador numérico">
       {KEYPAD_KEYS.map(({ key, letters }) => (
-        <CallDialButton 
+        <DialButton 
           key={key} 
           label={key} 
           letters={letters} 
           disabled={disabled} 
           onClick={() => onKeyPress(key)}
+          size={size}
         />
       ))}
     </div>
   )
 }
+
 

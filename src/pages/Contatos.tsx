@@ -1,11 +1,11 @@
 import { useEffect, useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { TopBar } from '../components/ui/TopBar'
-import { Card } from '../components/ui/Card'
+import { TopBar } from '../components/ui/BarraSuperior'
+import { Card } from '../components/ui/Cartao'
 import { useSip } from '../sip/react/useSip'
-import { clearStorage } from '../services/storageService'
-import { getContacts, addContact, deleteContact, type Contact } from '../services/contactService'
-import { AddContactModal } from '../components/contacts/AddContactModal'
+import { clearStorage } from '../services/servicoArmazenamento'
+import { getContacts, addContact, deleteContact, type Contact } from '../services/servicoContatos'
+import { AddContactModal } from '../components/contacts/ModalAdicionarContato'
 
 function SearchIcon() {
   return (
@@ -111,9 +111,9 @@ export default function Contatos() {
 
   function handleCall(number: string) {
     if (sip.snapshot.callStatus === 'idle') {
-      navigate(`/caller?number=${encodeURIComponent(number)}`)
+      navigate(`/discador?number=${encodeURIComponent(number)}`)
     } else {
-      navigate('/caller')
+      navigate('/discador')
     }
   }
 
@@ -124,7 +124,7 @@ export default function Contatos() {
       {!isIncoming && (
         <TopBar
           active="contacts"
-          onDialerClick={() => navigate('/caller')}
+          onDialerClick={() => navigate('/discador')}
           onHistoryClick={() => navigate('/historico')}
           onContactsClick={() => navigate('/contatos')}
           onLogout={() => {

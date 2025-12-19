@@ -1,6 +1,6 @@
-import type { CallHistoryEntry } from '../../services/historyService'
+import type { CallHistoryEntry } from '../../services/servicoHistorico'
 
-type CallHistoryRowProps = {
+type PropsLinhaHistoricoChamadas = {
   entry: CallHistoryEntry
   onCall: (number: string) => void
 }
@@ -118,7 +118,7 @@ function PhoneIcon() {
   )
 }
 
-export function CallHistoryRow({ entry, onCall }: CallHistoryRowProps) {
+export function CallHistoryRow({ entry, onCall }: PropsLinhaHistoricoChamadas) {
   const statusBadge = getStatusBadge(entry.status)
   const displayText = entry.displayName || entry.number
   

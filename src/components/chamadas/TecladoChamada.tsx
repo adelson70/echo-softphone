@@ -1,13 +1,12 @@
-import { DialButton } from './DialButton'
+import { CallDialButton } from './BotaoDiscarChamada'
 
-type DialPadProps = {
+type PropsTecladoChamada = {
   onKeyPress: (key: string) => void
   className?: string
   disabled?: boolean
-  size?: 'default' | 'small'
 }
 
-const KEYPAD_KEYS: Array<{ key: string; letters?: string }> = [
+const TECLAS_TECLADO: Array<{ key: string; letters?: string }> = [
   { key: '1' },
   { key: '2', letters: 'ABC' },
   { key: '3', letters: 'DEF' },
@@ -26,21 +25,19 @@ function cx(...classes: Array<string | undefined | false>) {
   return classes.filter(Boolean).join(' ')
 }
 
-export function DialPad({ onKeyPress, className, disabled, size = 'default' }: DialPadProps) {
+export function CallKeypad({ onKeyPress, className, disabled }: PropsTecladoChamada) {
   return (
-    <div className={cx('grid w-full grid-cols-3 gap-4', className)} role="group" aria-label="Discador numérico">
-      {KEYPAD_KEYS.map(({ key, letters }) => (
-        <DialButton 
+    <div className={cx('grid w-full grid-cols-3 gap-1.5', className)} role="group" aria-label="Discador numérico para ligação">
+      {TECLAS_TECLADO.map(({ key, letters }) => (
+        <CallDialButton 
           key={key} 
           label={key} 
           letters={letters} 
           disabled={disabled} 
           onClick={() => onKeyPress(key)}
-          size={size}
         />
       ))}
     </div>
   )
 }
-
 
