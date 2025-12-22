@@ -1,6 +1,16 @@
 import Store from 'electron-store';
 import { app } from 'electron';
 import path from 'node:path';
+import fs from 'node:fs';
+
+// Verifica se está rodando em um AppImage
+const isAppImage = () => {
+  if (process.platform !== 'linux') {
+    return false;
+  }
+  // AppImage define a variável de ambiente APPIMAGE
+  return !!process.env.APPIMAGE || process.execPath.includes('.mount_');
+};
 
 // Configura o caminho de dados para ser portátil (ao lado do executável)
 const getPortableDataPath = () => {
@@ -24,6 +34,11 @@ const getPortableDataPath = () => {
     return path.join(path.dirname(appBundlePath), 'data');
   } else {
     // Linux: AppImage ou executável direto
+    if (isAppImage()) {
+      // Para AppImage, usa diretório de dados do usuário em ~/.config/Echo
+      // Isso evita problemas com diretórios temporários de montagem do AppImage
+      return path.join(app.getPath('home'), '.config', 'Echo');
+    }
     executablePath = process.execPath;
   }
   
@@ -56,6 +71,16 @@ export interface CallHistoryEntry {
 }
 
 const dataPath = getPortableDataPath();
+
+// Garante que o diretório existe antes de inicializar o Store
+if (dataPath) {
+  try {
+    fs.mkdirSync(dataPath, { recursive: true });
+  } catch (error) {
+    console.error('Erro ao criar diretório de dados:', error);
+    // Se falhar, usa o padrão do sistema
+  }
+}
 
 export const appStore = new Store({
     name: 'softphone-app',
