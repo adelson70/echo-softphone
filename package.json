@@ -26,7 +26,11 @@
     "build": "tsc && vite build && electron-builder",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "generate-icons": "node build/generate-icons.cjs"
+    "generate-icons": "node build/generate-icons.cjs",
+    "linux": "electron-builder --linux",
+    "mac": "electron-builder --mac",
+    "windows": "electron-builder --windows",
+    "all": "npm run linux && npm run mac && npm run windows"
   },
   "dependencies": {
     "dotenv": "^17.2.3",
