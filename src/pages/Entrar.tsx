@@ -3,9 +3,11 @@ import { Card } from '../components/ui/Cartao'
 import { Button } from '../components/ui/Botao'
 import { InputText } from '../components/ui/EntradaTexto'
 import { InputPassword } from '../components/ui/EntradaSenha'
+import { Select } from '../components/ui/Seletor'
 import { loadSipConfig, saveSipConfig } from '../sip/config/sipConfigStore'
 import { useSip } from '../sip/react/useSip'
 import { useNavigate } from 'react-router-dom'
+import type { SipTransportProtocol } from '../sip/types'
 
 function UserIcon() {
   return (
@@ -74,6 +76,27 @@ function GlobeIcon() {
   )
 }
 
+function ChevronDownIcon({ open }: { open: boolean }) {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+      className={`transition-transform ${open ? 'rotate-180' : ''}`}
+    >
+      <path
+        d="M6 9l6 6 6-6"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
 export default function Entrar() {
   const navigate = useNavigate()
   const sip = useSip()
@@ -83,6 +106,9 @@ export default function Entrar() {
   const [sipDomain, setSipDomain] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showAdvanced, setShowAdvanced] = useState(false)
+  const [port, setPort] = useState<number>(5060)
+  const [protocol, setProtocol] = useState<SipTransportProtocol>('wss')
 
   useEffect(() => {
     let mounted = true
@@ -91,6 +117,8 @@ export default function Entrar() {
       setSipUser(cfg.username ?? '')
       setSipPassword(cfg.password ?? '')
       setSipDomain(cfg.server ?? '')
+      setPort(cfg.port ?? 5060)
+      setProtocol(cfg.protocol ?? 'wss')
     })
     return () => {
       mounted = false
@@ -116,6 +144,8 @@ export default function Entrar() {
           username: cfg.username,
           password: cfg.password,
           server: cfg.server,
+          port: cfg.port,
+          protocol: cfg.protocol,
         })
         navigate('/discador')
       } catch {
@@ -139,12 +169,16 @@ export default function Entrar() {
         username: sipUser.trim(),
         password: sipPassword,
         server: sipDomain.trim(),
+        port,
+        protocol,
       })
       await saveSipConfig({
         username: sipUser.trim(),
         password: sipPassword,
         server: sipDomain.trim(),
         status: 'online',
+        port,
+        protocol,
       })
       navigate('/discador')
     } catch (err: any) {
@@ -193,16 +227,59 @@ export default function Entrar() {
               autoComplete="off"
             />
 
+            <div className="border-t border-white/5 pt-4">
+              <button
+                type="button"
+                onClick={() => setShowAdvanced(!showAdvanced)}
+                className="flex w-full items-center justify-between text-sm text-muted transition-colors hover:text-text"
+              >
+                <span>Opções Avançadas</span>
+                <ChevronDownIcon open={showAdvanced} />
+              </button>
+
+              {showAdvanced && (
+                <div className="mt-4 max-h-64 space-y-4 overflow-y-auto pr-2 animate-in slide-in-from-top-2 duration-200">
+                  <div>
+                    <label htmlFor="port" className="mb-2 block text-xs font-medium text-text">
+                      Porta
+                    </label>
+                    <input
+                      id="port"
+                      type="number"
+                      min="1"
+                      max="65535"
+                      value={port}
+                      onChange={(e) => setPort(Number(e.target.value) || 5060)}
+                      className="h-12 w-full rounded-xl border border-[#1E293B] bg-background px-4 text-sm text-text transition focus-visible:outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/30"
+                      placeholder="5060"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="protocol" className="mb-2 block text-xs font-medium text-text">
+                      Método de Transporte
+                    </label>
+                    <Select
+                      value={protocol}
+                      onChange={(value) => setProtocol(value as SipTransportProtocol)}
+                      options={[
+                        { value: 'udp', label: 'UDP' },
+                        { value: 'tcp', label: 'TCP' },
+                        { value: 'wss', label: 'WSS' },
+                      ]}
+                      placeholder="Selecione o transporte"
+                      ariaLabel="Método de Transporte"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
             <div className="pt-2">
               <Button type="submit" variant="primary" disabled={!canSubmit || isSubmitting}>
                 {isSubmitting ? 'Registrando...' : 'Registrar'}
               </Button>
               {error ? <p className="mt-3 text-xs text-danger text-center">{error}</p> : null}
-              <p className="mt-3 text-xs text-muted text-center">
-                Dica: use o domínio do seu provedor/servidor 
-                <br />
-                (ex.: <span className="text-text">sip.suaempresa.com</span>).
-              </p>
             </div>
           </form>
         </Card>

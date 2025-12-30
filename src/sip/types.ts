@@ -1,18 +1,18 @@
 import type { Invitation, Inviter, Registerer, Session, SessionState, UserAgent } from 'sip.js'
 
-export type SipTransportProtocol = 'ws' | 'wss'
+export type SipTransportProtocol = 'udp' | 'tcp' | 'wss'
 
 export type SipCredentials = {
   username: string
   password: string
   /** Pode ser domínio (ex: sip.suaempresa.com) ou URL WS/WSS completa (ex: wss://sip.suaempresa.com:8089/ws) */
   server: string
-  /** Porta do websocket quando `server` não for URL completa. Padrão: 8089 */
-  wsPort?: number
+  /** Porta quando `server` não for URL completa. Padrão: 5060 */
+  port?: number
   /** Path do websocket quando `server` não for URL completa. Padrão: /ws */
   wsPath?: string
-  /** Protocolo websocket quando `server` não for URL completa. Padrão: wss */
-  wsProtocol?: SipTransportProtocol
+  /** Protocolo de transporte quando `server` não for URL completa. Padrão: wss */
+  protocol?: SipTransportProtocol
 }
 
 export type SipConnectionState = 'idle' | 'connecting' | 'connected' | 'registered' | 'unregistered' | 'error'

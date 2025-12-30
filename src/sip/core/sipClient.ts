@@ -27,17 +27,13 @@ type NormalizedServer = {
 function normalizeServer(credentials: SipCredentials): NormalizedServer {
   const raw = credentials.server.trim()
   const wsPath = credentials.wsPath ?? '/ws'
-  // Porta padrão de WSS/WS no Asterisk/utech geralmente é 8089/8088.
-  // 5060 é SIP UDP/TCP e além disso é bloqueada pelo Chromium para WebSocket (ERR_UNSAFE_PORT).
-  const wsPort = credentials.wsPort ?? 8089
-  const wsProtocol = credentials.wsProtocol ?? 'wss'
+  // Porta padrão SIP é 5060.
+  const port = credentials.port ?? 5060
+  const protocol = credentials.protocol ?? 'wss'
 
   // Se vier URL WS/WSS completa, usamos direto.
   if (raw.startsWith('ws://') || raw.startsWith('wss://')) {
     const u = new URL(raw)
-    if (u.port === '5060') {
-      throw new Error('Porta 5060 é bloqueada para WebSocket (ERR_UNSAFE_PORT). Use a porta WSS do PBX (ex.: 8089) ou informe uma URL wss válida.')
-    }
     const domain = u.hostname
     const portPart = u.port ? `:${u.port}` : ''
     const aor = `sip:${credentials.username}@${domain}${portPart}`
@@ -46,13 +42,10 @@ function normalizeServer(credentials: SipCredentials): NormalizedServer {
 
   // Aceita "host:port" também.
   const [host, portMaybe] = raw.split(':')
-  const port = portMaybe ? Number(portMaybe) : wsPort
-  if (port === 5060) {
-    throw new Error('Porta 5060 é bloqueada para WebSocket (ERR_UNSAFE_PORT). Use a porta WSS do PBX (ex.: 8089).')
-  }
+  const finalPort = portMaybe ? Number(portMaybe) : port
   const domain = host
-  const wsServer = `${wsProtocol}://${domain}:${port}${wsPath.startsWith('/') ? wsPath : `/${wsPath}`}`
-  const aor = `sip:${credentials.username}@${domain}:${port}`
+  const wsServer = `${protocol}://${domain}:${finalPort}${wsPath.startsWith('/') ? wsPath : `/${wsPath}`}`
+  const aor = `sip:${credentials.username}@${domain}:${finalPort}`
   return { domain, wsServer, aor }
 }
 

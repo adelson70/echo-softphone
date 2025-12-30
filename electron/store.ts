@@ -53,6 +53,8 @@ export interface SipConfig {
     password: string;
     server: string;
     status: 'online' | 'offline';
+    port?: number;
+    protocol?: 'udp' | 'tcp' | 'wss';
 }
 
 export interface Contact {

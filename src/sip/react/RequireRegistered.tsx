@@ -35,6 +35,8 @@ export function RequireRegistered({ children }: PropsWithChildren) {
           username: cfg.username,
           password: cfg.password,
           server: cfg.server,
+          port: cfg.port,
+          protocol: cfg.protocol,
         })
       } catch {
         navigate('/')
