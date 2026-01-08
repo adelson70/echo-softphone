@@ -48,6 +48,8 @@ export type SipClientSnapshot = {
   lastError?: string
   identity?: SipIdentity
   muted?: boolean
+  /** URI/número da chamada saindo (quando callDirection === 'outgoing') */
+  remoteUri?: string
   /** Informativo: estado nativo do sip.js, quando houver sessão ativa */
   sipSessionState?: SessionState
 }

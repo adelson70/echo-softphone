@@ -91,6 +91,7 @@ struct SipSnapshot {
     std::string lastError;
     std::string username;
     std::string domain;
+    std::string remoteUri;  // URI/número da chamada saindo
     bool muted;
 };
 

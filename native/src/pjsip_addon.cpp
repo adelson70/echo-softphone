@@ -67,6 +67,10 @@ Napi::Object snapshotToObject(Napi::Env env, const echo::SipSnapshot& snap) {
     obj.Set("username", snap.username);
     obj.Set("domain", snap.domain);
     
+    if (!snap.remoteUri.empty()) {
+        obj.Set("remoteUri", snap.remoteUri);
+    }
+    
     if (!snap.incoming.user.empty()) {
         Napi::Object incoming = Napi::Object::New(env);
         incoming.Set("displayName", snap.incoming.displayName);

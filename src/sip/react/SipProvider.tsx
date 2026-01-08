@@ -53,9 +53,15 @@ export function SipProvider({ children }: PropsWithChildren) {
         clientRef.current.unregisterAndDisconnect().catch(() => {})
       }
 
-      console.log(`[SipProvider] Criando cliente para protocolo: ${protocol}`)
       clientRef.current = createSipClient(protocol, {
-        onSnapshot: (snap) => setSnapshot(snap),
+        onSnapshot: (snap) => {
+          console.log('[SipProvider] onSnapshot - Snapshot atualizado:', {
+            protocol,
+            snapshot: { ...snap },
+            timestamp: new Date().toISOString()
+          })
+          setSnapshot(snap)
+        },
       })
       setCurrentProtocol(protocol)
     }

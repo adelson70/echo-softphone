@@ -25,13 +25,33 @@ export default function Discador() {
   const estaEntrando = sip.snapshot.callStatus === 'incoming'
   const estaSaindo = sip.snapshot.callStatus === 'dialing' || sip.snapshot.callStatus === 'ringing'
 
+  // Log de mudanças de estado
+  useEffect(() => {
+    const renderizando = estaEstabelecido ? 'EstablishedState' : estaSaindo ? 'OutgoingState' : 'IdleState'
+    console.log('[Discador] Estado da chamada mudou:', {
+      callStatus: sip.snapshot.callStatus,
+      callDirection: sip.snapshot.callDirection,
+      remoteUri: sip.snapshot.remoteUri || 'vazio',
+      connection: sip.snapshot.connection,
+      emChamada,
+      estaEstabelecido,
+      estaEntrando,
+      estaSaindo,
+      valorDiscagem,
+      renderizando,
+      snapshot: { ...sip.snapshot },
+      timestamp: new Date().toISOString()
+    })
+  }, [sip.snapshot.callStatus, sip.snapshot.callDirection, sip.snapshot.remoteUri, sip.snapshot.connection, emChamada, estaEstabelecido, estaEntrando, estaSaindo, valorDiscagem])
+
   const numeroContatoEstabelecido = useMemo(() => {
     if (!estaEstabelecido) return null
     if (sip.snapshot.callDirection === 'incoming') {
       return sip.snapshot.incoming?.user ?? sip.snapshot.incoming?.uri ?? ''
     }
-    return valorDiscagem || ''
-  }, [estaEstabelecido, sip.snapshot.callDirection, sip.snapshot.incoming, valorDiscagem])
+    // Para chamadas saindo, usar remoteUri do snapshot se disponível, senão usar valorDiscagem
+    return sip.snapshot.remoteUri || valorDiscagem || ''
+  }, [estaEstabelecido, sip.snapshot.callDirection, sip.snapshot.incoming, sip.snapshot.remoteUri, valorDiscagem])
 
   const nomeContatoEstabelecido = useMemo(() => {
     if (!estaEstabelecido) return undefined
@@ -263,7 +283,7 @@ export default function Discador() {
         />
         ) : estaSaindo ? (
           <OutgoingState
-            dialValue={valorDiscagem}
+            dialValue={sip.snapshot.remoteUri || valorDiscagem}
             callStatus={sip.snapshot.callStatus === 'dialing' ? 'dialing' : 'ringing'}
             onHangup={() => void sip.hangup()}
           />

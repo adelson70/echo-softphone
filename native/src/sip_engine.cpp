@@ -19,6 +19,7 @@ SipEngine::SipEngine() {
     m_snapshot.callStatus = CallState::Idle;
     m_snapshot.callDirection = CallDirection::None;
     m_snapshot.muted = false;
+    m_snapshot.remoteUri = "";
 }
 
 SipEngine::~SipEngine() {
@@ -261,9 +262,10 @@ bool SipEngine::makeCall(const std::string& target) {
     std::string targetUri = makeTargetUri(target);
     pj_str_t uri = pj_str(const_cast<char*>(targetUri.c_str()));
 
-    updateSnapshot([](SipSnapshot& s) {
+    updateSnapshot([&target](SipSnapshot& s) {
         s.callStatus = CallState::Dialing;
         s.callDirection = CallDirection::Outgoing;
+        s.remoteUri = target;  // Salvar número chamado
         s.lastError = "";
     });
 
@@ -488,6 +490,9 @@ void SipEngine::emitEvent(const std::string& event) {
     ss << "\"muted\":" << (snap.muted ? "true" : "false") << ",";
     ss << "\"username\":\"" << snap.username << "\",";
     ss << "\"domain\":\"" << snap.domain << "\"";
+    if (!snap.remoteUri.empty()) {
+        ss << ",\"remoteUri\":\"" << snap.remoteUri << "\"";
+    }
     if (!snap.lastError.empty()) {
         ss << ",\"lastError\":\"" << snap.lastError << "\"";
     }
@@ -657,11 +662,64 @@ void SipEngine::onCallState(pjsua_call_id call_id, pjsip_event* e) {
             break;
     }
     
-    s_instance->updateSnapshot([newState](SipSnapshot& s) {
+    // Extrair informações da chamada
+    std::string remoteInfo;
+    if (ci.remote_info.ptr && ci.remote_info.slen > 0) {
+        remoteInfo = std::string(ci.remote_info.ptr, ci.remote_info.slen);
+    }
+    
+    // Determinar direção da chamada
+    CallDirection direction = s_instance->m_snapshot.callDirection;
+    if (direction == CallDirection::None) {
+        // Se não temos direção salva, determinar pela chamada
+        if (ci.role == PJSIP_ROLE_UAC) {
+            direction = CallDirection::Outgoing;
+        } else if (ci.role == PJSIP_ROLE_UAS) {
+            direction = CallDirection::Incoming;
+        }
+    }
+    
+    s_instance->updateSnapshot([newState, remoteInfo, direction](SipSnapshot& s) {
         s.callStatus = newState;
+        s.callDirection = direction;
+        
+        // Preservar remoteUri para chamadas saindo
+        if (direction == CallDirection::Outgoing) {
+            // Se ainda não temos remoteUri, tentar extrair do remote_info
+            if (s.remoteUri.empty() && !remoteInfo.empty()) {
+                // Tentar extrair número do URI
+                // Formato pode ser: "Display Name" <sip:numero@domain> ou sip:numero@domain
+                size_t ltPos = remoteInfo.find('<');
+                size_t gtPos = remoteInfo.find('>');
+                std::string uriPart = remoteInfo;
+                
+                // Se tem < >, extrair parte dentro
+                if (ltPos != std::string::npos && gtPos != std::string::npos && gtPos > ltPos) {
+                    uriPart = remoteInfo.substr(ltPos + 1, gtPos - ltPos - 1);
+                }
+                
+                // Extrair número (parte antes do @)
+                size_t sipPos = uriPart.find("sip:");
+                size_t atPos = uriPart.find('@');
+                if (sipPos != std::string::npos) {
+                    if (atPos != std::string::npos && atPos > sipPos) {
+                        s.remoteUri = uriPart.substr(sipPos + 4, atPos - sipPos - 4);
+                    } else {
+                        // Se não tem @, pegar tudo depois de sip:
+                        s.remoteUri = uriPart.substr(sipPos + 4);
+                    }
+                } else {
+                    // Se não tem sip:, usar como está (pode ser só o número)
+                    s.remoteUri = uriPart;
+                }
+            }
+            // Se já temos remoteUri, preservar (não sobrescrever)
+        }
+        
         if (newState == CallState::Terminated || newState == CallState::Idle) {
             s.callDirection = CallDirection::None;
             s.incoming = IncomingCallInfo();
+            s.remoteUri = "";  // Limpar quando chamada termina
         }
     });
     
