@@ -108,7 +108,7 @@ export default function Entrar() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showAdvanced, setShowAdvanced] = useState(false)
   const [port, setPort] = useState<number>(5060)
-  const [protocol, setProtocol] = useState<SipTransportProtocol>('wss')
+  const [protocol, setProtocol] = useState<SipTransportProtocol>('udp')
 
   useEffect(() => {
     let mounted = true
@@ -118,7 +118,7 @@ export default function Entrar() {
       setSipPassword(cfg.password ?? '')
       setSipDomain(cfg.server ?? '')
       setPort(cfg.port ?? 5060)
-      setProtocol(cfg.protocol ?? 'wss')
+      setProtocol(cfg.protocol ?? 'udp')
     })
     return () => {
       mounted = false
