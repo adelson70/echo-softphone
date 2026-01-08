@@ -11,6 +11,16 @@
     "dist",
     "dist-electron"
   ],
+  // Incluir binários nativos como recursos extras
+  "extraResources": [
+    {
+      "from": "native/build/Release/",
+      "to": "native/",
+      "filter": ["*.node"]
+    }
+  ],
+  // Hook para rebuild do módulo nativo se necessário
+  "afterPack": "./scripts/rebuild-native.cjs",
   "mac": {
     "target": [
       {
@@ -19,7 +29,10 @@
       }
     ],
     "icon": "build/icon.icns",
-    "artifactName": "${productName}-Mac-${version}-${arch}.${ext}"
+    "artifactName": "${productName}-Mac-${version}-${arch}.${ext}",
+    // Adicionar entitlements para áudio
+    "entitlements": "build/entitlements.mac.plist",
+    "entitlementsInherit": "build/entitlements.mac.plist"
   },
   "win": {
     "target": [
@@ -41,6 +54,18 @@
       "AppImage"
     ],
     "icon": "build/icon.png",
-    "artifactName": "${productName}-Linux-${version}.${ext}"
-  }
+    "artifactName": "${productName}-Linux-${version}.${ext}",
+    // Categorias para desktop entry
+    "category": "Network;Telephony;VoIP",
+    "desktop": {
+      "Name": "Echo Softphone",
+      "Comment": "Softphone SIP para chamadas VoIP",
+      "Terminal": false
+    }
+  },
+  // Configuração de NPM para compilar módulos nativos
+  "npmRebuild": true,
+  "nodeGypRebuild": false,
+  // Electron rebuild configuration
+  "electronCompile": false
 }

@@ -1,9 +1,10 @@
-import { createContext, useEffect, useMemo, useRef, useState } from 'react'
+import { createContext, useEffect, useMemo, useRef, useState, useCallback } from 'react'
 import type { PropsWithChildren } from 'react'
-import type { SipClientSnapshot, SipCredentials } from '../types'
-import { SipClient } from '../core/sipClient'
+import type { SipClientSnapshot, SipCredentials, SipTransportProtocol } from '../types'
+import type { ISipClient } from '../core/sipClientInterface'
+import { createSipClient, requiresNative } from '../core/sipClientFactory'
 import { bindRemoteAudio } from '../media/audioBinding'
-import { handleDtmf } from '../media/dtmf'
+import { handleDtmf, playLocalDtmfTone } from '../media/dtmf'
 import { useCallAudioFeedback } from './useCallAudioFeedback'
 import { useCallHistory } from './useCallHistory'
 
@@ -12,6 +13,8 @@ export type SipContextValue = {
   isRegistered: boolean
   callDurationSec: number
   speakerOn: boolean
+  /** Indica se está usando o backend nativo (PJSIP) */
+  isNativeBackend: boolean
 
   connectAndRegister: (credentials: SipCredentials) => Promise<void>
   unregisterAndDisconnect: () => Promise<void>
@@ -32,16 +35,33 @@ export function SipProvider({ children }: PropsWithChildren) {
   const [snapshot, setSnapshot] = useState<SipClientSnapshot>({ connection: 'idle', callStatus: 'idle' })
   const [callDurationSec, setCallDurationSec] = useState(0)
   const [speakerOn, setSpeakerOn] = useState(false)
+  const [currentProtocol, setCurrentProtocol] = useState<SipTransportProtocol>('wss')
 
   const remoteAudioRef = useRef<HTMLAudioElement | null>(null)
-  const clientRef = useRef<SipClient | null>(null)
+  const clientRef = useRef<ISipClient | null>(null)
   const timerRef = useRef<number | null>(null)
 
-  if (!clientRef.current) {
-    clientRef.current = new SipClient({
-      onSnapshot: (snap) => setSnapshot(snap),
-    })
-  }
+  // Verifica se está usando backend nativo
+  const isNativeBackend = requiresNative(currentProtocol)
+
+  // Função para criar/recriar o cliente baseado no protocolo
+  const getOrCreateClient = useCallback((protocol: SipTransportProtocol): ISipClient => {
+    // Se protocolo mudou ou cliente não existe, cria novo
+    if (!clientRef.current || currentProtocol !== protocol) {
+      // Limpar cliente anterior se existir
+      if (clientRef.current) {
+        clientRef.current.unregisterAndDisconnect().catch(() => {})
+      }
+
+      console.log(`[SipProvider] Criando cliente para protocolo: ${protocol}`)
+      clientRef.current = createSipClient(protocol, {
+        onSnapshot: (snap) => setSnapshot(snap),
+      })
+      setCurrentProtocol(protocol)
+    }
+
+    return clientRef.current
+  }, [currentProtocol])
 
   // Timer simples (UI)
   useEffect(() => {
@@ -62,7 +82,7 @@ export function SipProvider({ children }: PropsWithChildren) {
     }
   }, [snapshot.callStatus])
 
-  // Bind do áudio remoto quando estabelece a sessão
+  // Bind do áudio remoto quando estabelece a sessão (apenas para WebSocket/WebRTC)
   useEffect(() => {
     const client = clientRef.current
     const audioEl = remoteAudioRef.current
@@ -76,10 +96,15 @@ export function SipProvider({ children }: PropsWithChildren) {
     }
     
     if (snapshot.callStatus !== 'established') return
-    const session = client.getActiveSession()
-    if (!session) return
-    bindRemoteAudio(session, audioEl)
-  }, [snapshot.callStatus, snapshot.sipSessionState])
+    
+    // Bind de áudio apenas para WebSocket (WebRTC)
+    // O backend nativo gerencia áudio internamente via PJSIP
+    if (!isNativeBackend) {
+      const session = client.getActiveSession()
+      if (!session) return
+      bindRemoteAudio(session, audioEl)
+    }
+  }, [snapshot.callStatus, snapshot.sipSessionState, isNativeBackend])
 
   // Viva-voz (primeira versão): controla volume do áudio remoto.
   useEffect(() => {
@@ -104,40 +129,104 @@ export function SipProvider({ children }: PropsWithChildren) {
   }, [snapshot.callStatus])
 
   const value = useMemo<SipContextValue>(() => {
-    const client = clientRef.current!
-
     return {
       snapshot,
       isRegistered: snapshot.connection === 'registered',
       callDurationSec,
       speakerOn,
+      isNativeBackend,
 
-      connectAndRegister: (credentials) => client.connectAndRegister(credentials),
-      unregisterAndDisconnect: () => client.unregisterAndDisconnect(),
-      startCall: (target) => client.startCall(target),
-      answer: () => client.answer(),
-      reject: () => client.reject(),
-      hangup: () => client.hangup(),
+      connectAndRegister: async (credentials) => {
+        const protocol = credentials.protocol ?? 'wss'
+        const client = getOrCreateClient(protocol)
+        await client.connectAndRegister(credentials)
+      },
+
+      unregisterAndDisconnect: async () => {
+        const client = clientRef.current
+        if (client) {
+          await client.unregisterAndDisconnect()
+        }
+      },
+
+      startCall: async (target) => {
+        const client = clientRef.current
+        if (!client) throw new Error('Cliente não inicializado')
+        await client.startCall(target)
+      },
+
+      answer: async () => {
+        const client = clientRef.current
+        if (!client) throw new Error('Cliente não inicializado')
+        await client.answer()
+      },
+
+      reject: async () => {
+        const client = clientRef.current
+        if (!client) throw new Error('Cliente não inicializado')
+        await client.reject()
+      },
+
+      hangup: async () => {
+        const client = clientRef.current
+        if (!client) throw new Error('Cliente não inicializado')
+        await client.hangup()
+      },
+
       sendDtmf: (key, opts) => {
+        const client = clientRef.current
+        const playLocal = opts?.playLocal ?? true
+        const sendRemote = opts?.sendRemote ?? true
+
+        // Sempre tocar som local se solicitado
+        if (playLocal) {
+          playLocalDtmfTone(key)
+        }
+
+        if (!client || !sendRemote) return playLocal
+
+        // Para backend nativo, usar sendDtmf diretamente
+        if (isNativeBackend) {
+          return client.sendDtmf(key)
+        }
+
+        // Para WebSocket, usar handleDtmf que trabalha com a sessão
         const session = client.getActiveSession()
         return handleDtmf(session, key, {
-          playLocal: opts?.playLocal ?? true,
-          sendRemote: opts?.sendRemote ?? true,
+          playLocal: false, // Já tocamos acima
+          sendRemote: true,
         })
       },
-      toggleMute: () => client.toggleMuted(),
+
+      toggleMute: () => {
+        const client = clientRef.current
+        if (!client) return false
+        return client.toggleMuted()
+      },
+
       toggleSpeaker: () => setSpeakerOn((prev) => !prev),
-      transferBlind: (target) => client.transferBlind(target),
-      transferAttended: (target) => client.transferAttended(target),
+
+      transferBlind: async (target) => {
+        const client = clientRef.current
+        if (!client) throw new Error('Cliente não inicializado')
+        await client.transferBlind(target)
+      },
+
+      transferAttended: async (target) => {
+        const client = clientRef.current
+        if (!client) throw new Error('Cliente não inicializado')
+        await client.transferAttended(target)
+      },
     }
-  }, [snapshot, callDurationSec, speakerOn])
+  }, [snapshot, callDurationSec, speakerOn, isNativeBackend, getOrCreateClient])
 
   return (
     <SipContext.Provider value={value}>
       {children}
-      <audio ref={remoteAudioRef} autoPlay playsInline style={{ display: 'none' }} />
+      {/* Elemento de áudio apenas necessário para WebSocket/WebRTC */}
+      {!isNativeBackend && (
+        <audio ref={remoteAudioRef} autoPlay playsInline style={{ display: 'none' }} />
+      )}
     </SipContext.Provider>
   )
 }
-
-

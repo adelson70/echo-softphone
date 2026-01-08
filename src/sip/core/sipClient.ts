@@ -8,9 +8,11 @@ import {
   UserAgent,
 } from 'sip.js'
 import type { Session, URI } from 'sip.js'
-import type { SipClientEvents, SipClientSnapshot, SipCredentials } from '../types'
+import type { SipClientSnapshot, SipCredentials } from '../types'
+import type { ISipClient, SipClientEvents } from './sipClientInterface'
 import { canCancel, canReject, canSendBye } from './sessionGuards'
 import { createFixedSessionDescriptionHandlerFactory } from './customSessionDescriptionHandler'
+import { sendDtmf as sendDtmfToSession } from '../media/dtmf'
 
 function formatSipFailure(statusCode?: number, reasonPhrase?: string) {
   if (!statusCode) return 'Falha SIP'
@@ -64,7 +66,7 @@ function getIncomingInfo(inv: Invitation) {
   return { displayName, uri, user }
 }
 
-export class SipClient {
+export class SipClient implements ISipClient {
   private events: SipClientEvents
   private server?: NormalizedServer
 
@@ -489,6 +491,14 @@ export class SipClient {
 
   getDomain(): string | undefined {
     return this.server?.domain
+  }
+
+  /**
+   * Envia DTMF na sessão ativa
+   */
+  sendDtmf(tones: string): boolean {
+    if (!this.session) return false
+    return sendDtmfToSession(this.session, tones)
   }
 }
 

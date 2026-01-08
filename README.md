@@ -20,6 +20,7 @@ O **Echo** é um softphone SIP moderno e profissional desenvolvido com tecnologi
 
 - 🎯 **Interface Moderna**: Design intuitivo e responsivo com Tailwind CSS
 - 📞 **Chamadas Completas**: Suporte para chamadas de entrada e saída
+- 🌐 **Multi-Protocolo**: Suporte a **UDP**, **TCP** e **WebSocket (WSS)**
 - 🔇 **Controle de Áudio**: Mute, speaker e ajustes de volume
 - 📋 **Histórico de Chamadas**: Registro completo com busca e filtros
 - 👥 **Agenda de Contatos**: Gerenciamento completo de contatos com busca
@@ -31,14 +32,25 @@ O **Echo** é um softphone SIP moderno e profissional desenvolvido com tecnologi
 
 ## 🛠️ Tecnologias
 
+### Core
 - **[Electron](https://www.electronjs.org/)** - Framework multiplataforma
 - **[React](https://react.dev/)** - Biblioteca UI
 - **[TypeScript](https://www.typescriptlang.org/)** - Tipagem estática
-- **[SIP.js](https://sipjs.com/)** - Cliente SIP para WebRTC
-- **[Tailwind CSS](https://tailwindcss.com/)** - Framework CSS utilitário
 - **[Vite](https://vitejs.dev/)** - Build tool e dev server
+
+### Comunicação SIP
+| Protocolo | Biblioteca | Uso |
+|-----------|------------|-----|
+| **WSS** (WebSocket) | [SIP.js](https://sipjs.com/) | WebRTC em navegadores |
+| **UDP/TCP** | [PJSIP](https://pjsip.org/) | Módulo nativo C++ |
+
+### UI/UX
+- **[Tailwind CSS](https://tailwindcss.com/)** - Framework CSS utilitário
+- **[Lucide React](https://lucide.dev/)** - Ícones
 - **[React Router](https://reactrouter.com/)** - Roteamento
-- **[Electron Store](https://github.com/sindresorhus/electron-store)** - Armazenamento persistente
+
+### Armazenamento
+- **[Electron Store](https://github.com/sindresorhus/electron-store)** - Persistência local
 
 ## 🚀 Instalação
 
@@ -46,29 +58,51 @@ O **Echo** é um softphone SIP moderno e profissional desenvolvido com tecnologi
 
 - Node.js 18+ e npm
 - Git
+- Para UDP/TCP: Visual Studio (Windows) ou build-essential (Linux)
 
-### Passos
+### Instalação Básica (apenas WebSocket)
 
-1. **Clone o repositório**
-   ```bash
-   git clone https://github.com/adelson70/softphonejs.git
-   cd softphonejs
-   ```
+```bash
+# Clone o repositório
+git clone https://github.com/adelson70/softphonejs.git
+cd softphonejs
 
-2. **Instale as dependências**
-   ```bash
-   npm install
-   ```
+# Instale as dependências
+npm install
 
-3. **Execute em modo desenvolvimento**
-   ```bash
-   npm run dev
-   ```
+# Execute em modo desenvolvimento
+npm run dev
 
-4. **Gere o build de produção**
-   ```bash
-   npm run build
-   ```
+# Gere o build de produção
+npm run build
+```
+
+### Instalação Completa (com suporte UDP/TCP)
+
+Para habilitar suporte a UDP e TCP, é necessário compilar o módulo nativo:
+
+```bash
+# Clone o repositório
+git clone https://github.com/adelson70/softphonejs.git
+cd softphonejs
+
+# Instale as dependências
+npm install
+
+# Configure e compile PJSIP
+npm run native:setup
+
+# Compile o módulo nativo
+npm run native:build
+
+# Execute
+npm run dev
+
+# Ou build completo
+npm run build:full
+```
+
+📚 **Documentação detalhada**: [docs/INTEGRACAO_NATIVA.md](docs/INTEGRACAO_NATIVA.md)
 
 ## 📖 Uso
 
@@ -78,8 +112,12 @@ O **Echo** é um softphone SIP moderno e profissional desenvolvido com tecnologi
 2. Informe suas credenciais SIP:
    - **Usuário SIP**: Seu nome de usuário/extension
    - **Senha SIP**: Sua senha
-   - **Domínio SIP**: O servidor SIP (ex: `sip.suaempresa.com` ou `wss://servidor.com:8089`)
-3. Clique em **Registrar** para conectar ao servidor SIP
+   - **Domínio SIP**: O servidor SIP (ex: `sip.suaempresa.com`)
+3. Em **Opções Avançadas**, selecione o protocolo de transporte:
+   - **WSS**: WebSocket Secure (padrão, funciona em todos os casos)
+   - **UDP**: Requer módulo nativo
+   - **TCP**: Requer módulo nativo
+4. Clique em **Registrar** para conectar ao servidor SIP
 
 ### Funcionalidades
 
@@ -112,9 +150,13 @@ O **Echo** é um softphone SIP moderno e profissional desenvolvido com tecnologi
 softphonejs/
 ├── electron/              # Código do processo principal Electron
 │   ├── app/              # Configurações e paths
-│   ├── ipc/              # Handlers IPC
+│   ├── ipc/              # Handlers IPC (store, window, sip)
 │   ├── windows/          # Gerenciamento de janelas
 │   └── main.ts           # Entry point Electron
+├── native/               # Módulo nativo PJSIP (opcional)
+│   ├── src/              # Código C++ do addon
+│   ├── deps/             # PJSIP source
+│   └── binding.gyp       # Configuração de build
 ├── src/
 │   ├── app/              # Componentes principais e rotas
 │   ├── components/       # Componentes React
@@ -126,40 +168,68 @@ softphonejs/
 │   ├── services/         # Serviços de negócio
 │   ├── sip/              # Lógica SIP
 │   │   ├── config/       # Configuração SIP
-│   │   ├── core/         # Cliente SIP e handlers
+│   │   ├── core/         # Clientes SIP (WebSocket e Nativo)
 │   │   ├── media/        # Áudio e DTMF
+│   │   ├── native/       # Cliente nativo via IPC
 │   │   └── react/        # Hooks React para SIP
 │   └── styles/           # Estilos globais
+├── scripts/              # Scripts de build e setup
 ├── build/                # Ícones e assets
+├── docs/                 # Documentação
 └── dist-electron/        # Build do Electron
 ```
 
 ## 🔧 Configuração
 
+### Protocolos de Transporte
+
+| Protocolo | Porta Padrão | Requer Nativo | Notas |
+|-----------|--------------|---------------|-------|
+| **WSS** | 8089 | Não | Funciona em qualquer ambiente |
+| **UDP** | 5060 | Sim | Melhor para redes confiáveis |
+| **TCP** | 5060 | Sim | Mais confiável que UDP |
+
 ### Servidor SIP
 
-O Echo suporta conexão via WebSocket (WSS/WS) a servidores SIP. Formatos aceitos:
+O Echo suporta conexão via:
 
-- URL completa: `wss://servidor.com:8089/ws`
-- Host e porta: `servidor.com:8089`
-- Apenas domínio: `servidor.com` (usa porta padrão 8089)
+- **WebSocket**: URL completa (`wss://servidor.com:8089/ws`) ou host (`servidor.com`)
+- **UDP/TCP**: Domínio e porta (`servidor.com:5060`)
 
-**Nota**: A porta 5060 (SIP padrão) é bloqueada pelo Chromium para WebSocket. Use a porta WSS do seu PBX (geralmente 8088 ou 8089).
+**Nota**: A porta 5060 (SIP padrão) é bloqueada pelo Chromium para WebSocket. Use a porta WSS do seu PBX (geralmente 8088 ou 8089) para conexões WebSocket.
 
 ### Armazenamento
 
 As configurações e dados são armazenados localmente usando Electron Store:
-- Credenciais SIP (criptografadas)
+- Credenciais SIP
 - Histórico de chamadas
 - Lista de contatos
 
+Em modo portátil, os dados ficam em uma pasta `data/` ao lado do executável.
+
 ## 📝 Scripts Disponíveis
 
+### Desenvolvimento
 - `npm run dev` - Inicia o aplicativo em modo desenvolvimento
-- `npm run build` - Compila o projeto e gera os instaladores
 - `npm run lint` - Executa o linter ESLint
 - `npm run preview` - Preview do build de produção
-- `npm run generate-icons` - Gera ícones para diferentes plataformas
+
+### Build
+- `npm run build` - Compila o projeto e gera os instaladores
+- `npm run build:native` - Compila apenas o módulo nativo
+- `npm run build:full` - Compila nativo + aplicativo
+
+### Módulo Nativo
+- `npm run native:setup` - Baixa e configura PJSIP
+- `npm run native:build` - Compila o módulo nativo
+- `npm run native:rebuild` - Recompila o módulo
+- `npm run native:clean` - Limpa arquivos de build
+
+### Plataformas
+- `npm run windows` - Build para Windows (Portable .exe)
+- `npm run linux` - Build para Linux (AppImage)
+- `npm run mac` - Build para macOS (zip)
+- `npm run all` - Build para todas as plataformas
 
 ## 🎨 Interface
 
@@ -173,7 +243,12 @@ A interface foi projetada com foco em:
 
 - Credenciais SIP armazenadas localmente de forma segura
 - Comunicação via WSS (WebSocket Secure) quando disponível
+- SRTP disponível com módulo nativo (PJSIP)
 - Sem transmissão de dados para servidores externos
+
+## 📚 Documentação Adicional
+
+- [Integração do Módulo Nativo](docs/INTEGRACAO_NATIVA.md) - Guia completo para UDP/TCP
 
 ## 🤝 Contribuindo
 
@@ -189,10 +264,14 @@ Contribuições são bem-vindas! Por favor:
 
 Este projeto é privado. Todos os direitos reservados.
 
+O módulo nativo usa PJSIP que está sob GPL v2 ou licença comercial.
+
 ## 🔗 Links
 
 - **Repositório**: [GitHub](https://github.com/adelson70/softphonejs)
 - **Website**: [Landing Page](https://echo-landingpage-eta.vercel.app/)
+- **Documentação PJSIP**: [pjsip.org](https://www.pjsip.org/)
+- **Documentação SIP.js**: [sipjs.com](https://sipjs.com/)
 
 ## 👨‍💻 Autor
 
@@ -203,5 +282,7 @@ Desenvolvido com ❤️ por [adelson70](https://github.com/adelson70)
 <div align="center">
 
 **Echo - Sua solução profissional para comunicação VoIP**
+
+*Agora com suporte a UDP, TCP e WebSocket*
 
 </div>
