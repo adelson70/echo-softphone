@@ -8,13 +8,8 @@
 
 import { ipcMain, app } from 'electron'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 import { createRequire } from 'node:module'
 import { getMainWindow } from '../app/lifecycle'
-
-// Obter __dirname em ES modules
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
 
 // Criar require para ES modules
 const require = createRequire(import.meta.url)

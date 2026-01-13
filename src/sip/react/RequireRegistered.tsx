@@ -75,9 +75,9 @@ export function RequireRegistered({ children }: PropsWithChildren) {
       // Se estiver usando backend nativo, tentar buscar snapshot diretamente
       if (sip.isNativeBackend && window.sipNative) {
         try {
-          const nativeSnap = await window.sipNative.getSnapshot()
           // Se o módulo nativo diz que está registrado, o snapshot será atualizado pelo evento
           // Não forçar atualização aqui para evitar loops
+          await window.sipNative.getSnapshot()
         } catch {
           // Ignorar erros no polling
         }

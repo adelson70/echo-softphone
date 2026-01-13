@@ -12,7 +12,6 @@ import type {
   SipConnectionState,
   CallStatus,
   SipCallDirection,
-  IncomingCallInfo,
 } from '../types'
 import type { ISipClient, SipClientEvents } from '../core/sipClientInterface'
 

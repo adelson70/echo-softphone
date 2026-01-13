@@ -15,7 +15,8 @@ export function setupStoreIPC(): void {
   })
 
   ipcMain.handle('store:delete', (_event, key: string) => {
-    appStore.delete(key)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ;(appStore as any).delete(key)
   })
 }
 
